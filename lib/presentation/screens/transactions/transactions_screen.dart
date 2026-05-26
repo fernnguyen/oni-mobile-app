@@ -65,6 +65,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
         onRefresh: () => ref.read(transactionsNotifierProvider.notifier).getAllTransactions(),
         displacement: 60,
         child: Scrollbar(
+          controller: scrollController,
           child: CustomScrollView(
             controller: scrollController,
             // Disable scroll when data is null or empty

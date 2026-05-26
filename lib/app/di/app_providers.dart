@@ -31,6 +31,7 @@ import '../../domain/repositories/storage_repository.dart';
 import '../../domain/repositories/transaction_repository.dart';
 import '../../domain/repositories/user_repository.dart';
 import '../routes/app_routes.dart';
+import '../../presentation/providers/auth/auth_notifier.dart';
 
 // Startup overrides
 final sharedPreferencesProvider = Provider<SharedPreferences>(
@@ -68,6 +69,9 @@ final apiClientProvider = Provider<ApiClient>(
   (ref) => ApiClient(
     sharedPreferences: ref.watch(sharedPreferencesProvider),
     supabaseClient: ref.watch(supabaseClientProvider),
+    onUnauthorized: () {
+      ref.read(authNotifierProvider.notifier).signOut();
+    },
   ),
 );
 

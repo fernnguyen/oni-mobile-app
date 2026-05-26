@@ -249,7 +249,7 @@ class _ShopSelectScreenState extends ConsumerState<ShopSelectScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.errorContainer.withOpacity(0.4),
+                  color: theme.colorScheme.errorContainer.withValues(alpha: 0.4),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -297,7 +297,7 @@ class _ShopSelectScreenState extends ConsumerState<ShopSelectScreen> {
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: Colors.grey.withOpacity(0.08),
+                  color: Colors.grey.withValues(alpha: 0.08),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
@@ -343,12 +343,12 @@ class _ShopSelectScreenState extends ConsumerState<ShopSelectScreen> {
             color: Colors.white,
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
-              color: Colors.grey.withOpacity(0.08),
+              color: Colors.grey.withValues(alpha: 0.08),
               width: 1.2,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.02),
+                color: Colors.black.withValues(alpha: 0.02),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -370,7 +370,7 @@ class _ShopSelectScreenState extends ConsumerState<ShopSelectScreen> {
                       width: 54,
                       height: 54,
                       decoration: BoxDecoration(
-                        color: AppColors.primary.withOpacity(0.1),
+                        color: AppColors.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(14),
                       ),
                       child: const Center(
@@ -397,7 +397,7 @@ class _ShopSelectScreenState extends ConsumerState<ShopSelectScreen> {
                           Text(
                             'Slug: ${shop.slug}',
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant.withOpacity(0.7),
+                              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -434,13 +434,13 @@ class _ShopSelectScreenState extends ConsumerState<ShopSelectScreen> {
                     Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
-                        color: Colors.grey.withOpacity(0.06),
+                        color: Colors.grey.withValues(alpha: 0.06),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
                         Icons.arrow_forward_ios_rounded,
                         size: 12,
-                        color: theme.colorScheme.onSurfaceVariant.withOpacity(0.8),
+                        color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
                       ),
                     ),
                   ],

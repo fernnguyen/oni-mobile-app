@@ -132,6 +132,7 @@ class _Body extends ConsumerWidget {
       body: RefreshIndicator(
         onRefresh: onRefresh,
         child: Scrollbar(
+          controller: scrollController,
           child: CustomScrollView(
             controller: scrollController,
             // Disable scroll when data is null or empty

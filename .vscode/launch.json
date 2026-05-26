@@ -1,16 +1,28 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "Flutter POS",
-            "request": "launch",
-            "type": "dart",
-            "program": "lib/main.dart",
-            "args": [
-                "--dart-define-from-file",
-                "config.json",
-            ]
-        },
-        
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Flutter POS (with config.json)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "args": [
+        "--dart-define-from-file",
+        "config.json"
+      ]
+    },
+    {
+      "name": "Flutter POS (macOS Debug with Supabase defines)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "args": [
+        "-d",
+        "macos",
+        "--dart-define=SUPABASE_URL=https://ddkjsthxnskdncefnuhi.supabase.co",
+        "--dart-define=SUPABASE_ANON_KEY=sb_publishable_0tpKMXkxF8NMQOFTAQHZlg_29Pkt61f",
+        "--dart-define=DEV_API_HOST=localhost:3000"
+      ]
+    }
+  ]
 }

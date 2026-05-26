@@ -113,13 +113,13 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                       border: OutlineInputBorder(
                         borderRadius: const BorderRadius.all(Radius.circular(14)),
                         borderSide: BorderSide(
-                          color: theme.colorScheme.outline.withOpacity(0.3),
+                          color: theme.colorScheme.outline.withValues(alpha: 0.3),
                         ),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: const BorderRadius.all(Radius.circular(14)),
                         borderSide: BorderSide(
-                          color: theme.colorScheme.outline.withOpacity(0.3),
+                          color: theme.colorScheme.outline.withValues(alpha: 0.3),
                         ),
                       ),
                       focusedBorder: const OutlineInputBorder(
@@ -158,13 +158,13 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                       border: OutlineInputBorder(
                         borderRadius: const BorderRadius.all(Radius.circular(14)),
                         borderSide: BorderSide(
-                          color: theme.colorScheme.outline.withOpacity(0.3),
+                          color: theme.colorScheme.outline.withValues(alpha: 0.3),
                         ),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: const BorderRadius.all(Radius.circular(14)),
                         borderSide: BorderSide(
-                          color: theme.colorScheme.outline.withOpacity(0.3),
+                          color: theme.colorScheme.outline.withValues(alpha: 0.3),
                         ),
                       ),
                       focusedBorder: const OutlineInputBorder(
@@ -214,13 +214,13 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                       border: OutlineInputBorder(
                         borderRadius: const BorderRadius.all(Radius.circular(14)),
                         borderSide: BorderSide(
-                          color: theme.colorScheme.outline.withOpacity(0.3),
+                          color: theme.colorScheme.outline.withValues(alpha: 0.3),
                         ),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: const BorderRadius.all(Radius.circular(14)),
                         borderSide: BorderSide(
-                          color: theme.colorScheme.outline.withOpacity(0.3),
+                          color: theme.colorScheme.outline.withValues(alpha: 0.3),
                         ),
                       ),
                       focusedBorder: const OutlineInputBorder(

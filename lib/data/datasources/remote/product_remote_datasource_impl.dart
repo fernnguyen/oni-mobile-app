@@ -30,7 +30,7 @@ class ProductRemoteDatasourceImpl extends ProductDatasource {
     try {
       final res = await apiClient.post<Map<String, dynamic>>(
         '/api/shops/$shopId/products',
-        body: product.toBackendJson(),
+        body: product.toBackendJson(includeId: false),
         fromJson: (json) => json as Map<String, dynamic>,
       );
 

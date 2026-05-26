@@ -70,6 +70,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
         onRefresh: () => ref.read(productsNotifierProvider.notifier).getAllProducts(),
         displacement: 60,
         child: Scrollbar(
+          controller: scrollController,
           child: CustomScrollView(
             controller: scrollController,
             // Disable scroll when data is null or empty

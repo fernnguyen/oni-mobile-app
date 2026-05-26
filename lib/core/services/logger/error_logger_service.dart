@@ -1,13 +1,8 @@
 import '../../utilities/console_logger.dart';
-import '../../utilities/debug_mode_wrapper.dart';
 
 /// Global error logging service
 class ErrorLoggerService {
-  final DebugModeWrapper _debugMode;
-
-  ErrorLoggerService({
-    DebugModeWrapper? debugMode,
-  }) : _debugMode = debugMode ?? DebugModeWrapper();
+  ErrorLoggerService();
 
   /// Log error
   void log({

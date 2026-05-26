@@ -27,7 +27,7 @@ class ProductsCard extends StatelessWidget {
         highlightColor: Colors.black12,
         borderRadius: BorderRadius.circular(4),
         child: Ink(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(6),
@@ -60,32 +60,44 @@ class ProductsCard extends StatelessWidget {
                     product.stock <= 0 ? _OutOfStock() : const SizedBox.shrink(),
                   ],
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  product.name,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.inventory_2,
-                      size: 8,
-                      color: Theme.of(context).colorScheme.outline,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      'Stock ${product.stock}  |  Sold ${product.sold}',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 8),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  CurrencyFormatter.format(product.price),
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
+                const SizedBox(height: 6),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        product.name,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          height: 1.1,
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.inventory_2,
+                            size: 8,
+                            color: Theme.of(context).colorScheme.outline,
+                          ),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              'Stock ${product.stock}  |  Sold ${product.sold}',
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 8),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Text(
+                        CurrencyFormatter.format(product.price),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),

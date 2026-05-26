@@ -29,13 +29,26 @@ class CartPanelBody extends StatelessWidget {
   }
 }
 
-class _OrderList extends ConsumerWidget {
+class _OrderList extends ConsumerStatefulWidget {
   final PanelController panelController;
 
-  const _OrderList({required this.panelController});
+  const _OrderList({super.key, required this.panelController});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_OrderList> createState() => _OrderListState();
+}
+
+class _OrderListState extends ConsumerState<_OrderList> {
+  final scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final homeState = ref.watch(homeNotifierProvider);
 
     if (homeState.orderedProducts.isEmpty) {
@@ -51,7 +64,9 @@ class _OrderList extends ConsumerWidget {
     return SizedBox(
       height: AppSizes.screenHeight(context) - 272,
       child: Scrollbar(
+        controller: scrollController,
         child: ListView.builder(
+          controller: scrollController,
           itemCount: homeState.orderedProducts.length,
           padding: const EdgeInsets.all(AppSizes.padding),
           itemBuilder: (context, i) {
@@ -69,7 +84,7 @@ class _OrderList extends ConsumerWidget {
                 onTapRemove: () {
                   final isLast = homeState.orderedProducts.length == 1;
                   ref.read(homeNotifierProvider.notifier).onRemoveOrderedProduct(homeState.orderedProducts[i]);
-                  if (isLast) panelController.close();
+                  if (isLast) widget.panelController.close();
                 },
               ),
             );

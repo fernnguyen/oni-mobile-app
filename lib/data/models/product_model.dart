@@ -105,9 +105,9 @@ class ProductModel {
   }
 
   /// Chuyển đổi sang định dạng JSON phù hợp với NextJS ERP Backend
-  Map<String, dynamic> toBackendJson() {
+  Map<String, dynamic> toBackendJson({bool includeId = true}) {
     return {
-      'id': id.toString(),
+      if (includeId) 'id': id.toString(),
       'name': name,
       'image_url': imageUrl,
       'stock_qty': stock.toString(),
