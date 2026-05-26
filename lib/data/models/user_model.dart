@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase_auth;
 
 import '../../domain/entities/user_entity.dart';
@@ -88,24 +87,7 @@ class UserModel {
     );
   }
 
-  /// Convert Firebase User to UserModel
-  factory UserModel.fromFirebaseUser(
-    firebase_auth.User firebaseUser, {
-    AuthProvider authProvider = AuthProvider.google,
-  }) {
-    return UserModel(
-      id: firebaseUser.uid,
-      email: firebaseUser.email,
-      phone: firebaseUser.phoneNumber,
-      name: firebaseUser.displayName,
-      gender: null,
-      birthdate: null,
-      imageUrl: firebaseUser.photoURL,
-      authProvider: authProvider.value,
-      createdAt: null,
-      updatedAt: null,
-    );
-  }
+
 
   /// Convert Supabase User to UserModel
   factory UserModel.fromSupabaseUser(

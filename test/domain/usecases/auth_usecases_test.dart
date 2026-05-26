@@ -33,11 +33,11 @@ void main() {
     mockAuthRepository = MockAuthRepository();
   });
 
-  group('SignInWithGoogleUsecase', () {
-    late SignInWithGoogleUsecase usecase;
+  group('SignInWithEmailAndPasswordUsecase', () {
+    late SignInWithEmailAndPasswordUsecase usecase;
 
     setUp(() {
-      usecase = SignInWithGoogleUsecase(mockAuthRepository);
+      usecase = SignInWithEmailAndPasswordUsecase(mockAuthRepository);
     });
 
     test('should return user from repository on successful sign in', () async {
@@ -49,14 +49,26 @@ void main() {
       );
       final result = Result<UserEntity>.success(data: user);
 
-      when(mockAuthRepository.signInWithGoogle()).thenAnswer((_) async => result);
+      when(mockAuthRepository.signInWithEmailAndPassword(
+        'subdomain',
+        'test@example.com',
+        'password123',
+      )).thenAnswer((_) async => result);
 
       // act
-      final response = await usecase.call(NoParam());
+      final response = await usecase.call(SignInParams(
+        subdomain: 'subdomain',
+        email: 'test@example.com',
+        password: 'password123',
+      ));
 
       // assert
       expect(response, result);
-      verify(mockAuthRepository.signInWithGoogle());
+      verify(mockAuthRepository.signInWithEmailAndPassword(
+        'subdomain',
+        'test@example.com',
+        'password123',
+      ));
       verifyNoMoreInteractions(mockAuthRepository);
     });
 
@@ -64,14 +76,26 @@ void main() {
       // arrange
       final result = Result<UserEntity>.failure(error: 'Sign in failed');
 
-      when(mockAuthRepository.signInWithGoogle()).thenAnswer((_) async => result);
+      when(mockAuthRepository.signInWithEmailAndPassword(
+        'subdomain',
+        'test@example.com',
+        'password123',
+      )).thenAnswer((_) async => result);
 
       // act
-      final response = await usecase.call(NoParam());
+      final response = await usecase.call(SignInParams(
+        subdomain: 'subdomain',
+        email: 'test@example.com',
+        password: 'password123',
+      ));
 
       // assert
       expect(response, result);
-      verify(mockAuthRepository.signInWithGoogle());
+      verify(mockAuthRepository.signInWithEmailAndPassword(
+        'subdomain',
+        'test@example.com',
+        'password123',
+      ));
       verifyNoMoreInteractions(mockAuthRepository);
     });
   });

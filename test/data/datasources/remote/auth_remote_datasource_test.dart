@@ -1,231 +1,143 @@
-import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter_pos/data/datasources/remote/auth_remote_datasource_impl.dart';
 import 'package:flutter_pos/data/models/user_model.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'auth_remote_datasource_test.mocks.dart';
 
-@GenerateMocks([
-  firebase_auth.FirebaseAuth,
-  GoogleSignIn,
-  firebase_auth.UserCredential,
-  firebase_auth.User,
-  GoogleSignInAccount,
-  GoogleSignInAuthentication,
-  GoogleSignInAuthorizationClient,
-  GoogleSignInClientAuthorization,
-])
+@GenerateMocks([SupabaseClient, GoTrueClient, AuthResponse, User])
 void main() {
   late AuthRemoteDataSourceImpl dataSource;
-  late MockFirebaseAuth mockFirebaseAuth;
-  late MockGoogleSignIn mockGoogleSignIn;
+  late MockSupabaseClient mockSupabaseClient;
+  late MockGoTrueClient mockGotrueClient;
 
   setUp(() {
-    mockFirebaseAuth = MockFirebaseAuth();
-    mockGoogleSignIn = MockGoogleSignIn();
+    mockSupabaseClient = MockSupabaseClient();
+    mockGotrueClient = MockGoTrueClient();
+    
+    // Stub supabaseClient.auth to return our mock GotrueClient
+    when(mockSupabaseClient.auth).thenReturn(mockGotrueClient);
+    
     dataSource = AuthRemoteDataSourceImpl(
-      firebaseAuth: mockFirebaseAuth,
-      googleSignIn: mockGoogleSignIn,
+      supabaseClient: mockSupabaseClient,
     );
   });
 
-  group('signInWithGoogle', () {
-    late MockGoogleSignInAccount mockGoogleSignInAccount;
-    late MockGoogleSignInAuthentication mockGoogleSignInAuthentication;
-    late MockGoogleSignInAuthorizationClient mockAuthorizationClient;
-    late MockGoogleSignInClientAuthorization mockAccessTokenAuth;
-    late MockUserCredential mockUserCredential;
+  group('signInWithEmailAndPassword', () {
+    late MockAuthResponse mockAuthResponse;
     late MockUser mockUser;
 
     setUp(() {
-      mockGoogleSignInAccount = MockGoogleSignInAccount();
-      mockGoogleSignInAuthentication = MockGoogleSignInAuthentication();
-      mockAuthorizationClient = MockGoogleSignInAuthorizationClient();
-      mockAccessTokenAuth = MockGoogleSignInClientAuthorization();
-      mockUserCredential = MockUserCredential();
+      mockAuthResponse = MockAuthResponse();
       mockUser = MockUser();
     });
 
-    test('successfully signs in with Google and returns UserModel', () async {
+    test('successfully signs in and returns UserModel', () async {
       // Arrange
-      when(
-        mockGoogleSignIn.initialize(
-          clientId: anyNamed('clientId'),
-          serverClientId: anyNamed('serverClientId'),
-        ),
-      ).thenAnswer((_) async => {});
+      when(mockGotrueClient.signInWithPassword(
+        email: 'test@example.com',
+        password: 'password123',
+      )).thenAnswer((_) async => mockAuthResponse);
 
-      when(mockGoogleSignIn.attemptLightweightAuthentication()).thenAnswer((_) async => mockGoogleSignInAccount);
-
-      when(mockGoogleSignInAccount.authentication).thenReturn(mockGoogleSignInAuthentication);
-
-      when(mockGoogleSignInAccount.authorizationClient).thenReturn(mockAuthorizationClient);
-
-      when(mockAuthorizationClient.authorizationForScopes(any)).thenAnswer((_) async => mockAccessTokenAuth);
-
-      when(mockGoogleSignInAuthentication.idToken).thenReturn('test_id_token');
-      when(mockAccessTokenAuth.accessToken).thenReturn('test_access_token');
-
-      when(mockFirebaseAuth.signInWithCredential(any)).thenAnswer((_) async => mockUserCredential);
-
-      when(mockUserCredential.user).thenReturn(mockUser);
-
-      when(mockUser.uid).thenReturn('test_uid');
+      when(mockAuthResponse.user).thenReturn(mockUser);
+      when(mockUser.id).thenReturn('test_uid');
       when(mockUser.email).thenReturn('test@example.com');
-      when(mockUser.displayName).thenReturn('Test User');
-      when(mockUser.photoURL).thenReturn('https://example.com/photo.jpg');
-      when(mockUser.phoneNumber).thenReturn('123');
+      when(mockUser.phone).thenReturn('123456');
+      when(mockUser.userMetadata).thenReturn({
+        'name': 'Test User',
+        'avatar_url': 'https://example.com/avatar.png',
+      });
+      when(mockUser.createdAt).thenReturn(DateTime.now().toIso8601String());
+      when(mockUser.updatedAt).thenReturn(DateTime.now().toIso8601String());
 
       // Act
-      final result = await dataSource.signInWithGoogle();
+      final result = await dataSource.signInWithEmailAndPassword(
+        'subdomain',
+        'test@example.com',
+        'password123',
+      );
 
       // Assert
       expect(result.isSuccess, true);
       expect(result.data, isA<UserModel>());
       expect(result.data?.id, 'test_uid');
       expect(result.data?.email, 'test@example.com');
-      expect(result.data?.phone, '123');
-
-      verify(
-        mockGoogleSignIn.initialize(
-          clientId: anyNamed('clientId'),
-          serverClientId: anyNamed('serverClientId'),
-        ),
-      ).called(1);
-      verify(mockGoogleSignIn.attemptLightweightAuthentication()).called(1);
-      verify(mockFirebaseAuth.signInWithCredential(any)).called(1);
+      expect(result.data?.name, 'Test User');
+      
+      verify(mockGotrueClient.signInWithPassword(
+        email: 'test@example.com',
+        password: 'password123',
+      )).called(1);
     });
 
-    test('returns failure when user is null after sign-in', () async {
+    test('returns failure when user data is null after sign-in', () async {
       // Arrange
-      when(
-        mockGoogleSignIn.initialize(
-          clientId: anyNamed('clientId'),
-          serverClientId: anyNamed('serverClientId'),
-        ),
-      ).thenAnswer((_) async => {});
+      when(mockGotrueClient.signInWithPassword(
+        email: 'test@example.com',
+        password: 'password123',
+      )).thenAnswer((_) async => mockAuthResponse);
 
-      when(mockGoogleSignIn.attemptLightweightAuthentication()).thenAnswer((_) async => mockGoogleSignInAccount);
-
-      when(mockGoogleSignInAccount.authentication).thenReturn(mockGoogleSignInAuthentication);
-
-      when(mockGoogleSignInAccount.authorizationClient).thenReturn(mockAuthorizationClient);
-
-      when(mockAuthorizationClient.authorizationForScopes(any)).thenAnswer((_) async => mockAccessTokenAuth);
-
-      when(mockGoogleSignInAuthentication.idToken).thenReturn('test_id_token');
-      when(mockAccessTokenAuth.accessToken).thenReturn('test_access_token');
-
-      when(mockFirebaseAuth.signInWithCredential(any)).thenAnswer((_) async => mockUserCredential);
-
-      when(mockUserCredential.user).thenReturn(null);
+      when(mockAuthResponse.user).thenReturn(null);
 
       // Act
-      final result = await dataSource.signInWithGoogle();
+      final result = await dataSource.signInWithEmailAndPassword(
+        'subdomain',
+        'test@example.com',
+        'password123',
+      );
 
       // Assert
       expect(result.isFailure, true);
-      expect(result.error, 'User data is null after sign-in.');
+      expect(result.error.toString(), contains('Dữ liệu người dùng trống'));
     });
 
-    test('returns failure when Google sign-in throws exception', () async {
+    test('returns failure when Supabase throws exception', () async {
       // Arrange
-      when(
-        mockGoogleSignIn.initialize(
-          clientId: anyNamed('clientId'),
-          serverClientId: anyNamed('serverClientId'),
-        ),
-      ).thenAnswer((_) async => {});
-
-      when(mockGoogleSignIn.attemptLightweightAuthentication()).thenThrow(Exception('Google sign-in failed'));
+      final exception = AuthException('Invalid login credentials');
+      when(mockGotrueClient.signInWithPassword(
+        email: 'test@example.com',
+        password: 'password123',
+      )).thenThrow(exception);
 
       // Act
-      final result = await dataSource.signInWithGoogle();
+      final result = await dataSource.signInWithEmailAndPassword(
+        'subdomain',
+        'test@example.com',
+        'password123',
+      );
 
       // Assert
       expect(result.isFailure, true);
-      expect(result.error, isA<Exception>());
-      expect(result.error.toString(), contains('Google sign-in failed'));
-    });
-
-    test('returns failure when Firebase authentication throws exception', () async {
-      // Arrange
-      when(
-        mockGoogleSignIn.initialize(
-          clientId: anyNamed('clientId'),
-          serverClientId: anyNamed('serverClientId'),
-        ),
-      ).thenAnswer((_) async => {});
-
-      when(mockGoogleSignIn.attemptLightweightAuthentication()).thenAnswer((_) async => mockGoogleSignInAccount);
-
-      when(mockGoogleSignInAccount.authentication).thenReturn(mockGoogleSignInAuthentication);
-
-      when(mockGoogleSignInAccount.authorizationClient).thenReturn(mockAuthorizationClient);
-
-      when(mockAuthorizationClient.authorizationForScopes(any)).thenAnswer((_) async => mockAccessTokenAuth);
-
-      when(mockGoogleSignInAuthentication.idToken).thenReturn('test_id_token');
-      when(mockAccessTokenAuth.accessToken).thenReturn('test_access_token');
-
-      when(
-        mockFirebaseAuth.signInWithCredential(any),
-      ).thenThrow(firebase_auth.FirebaseAuthException(code: 'auth-error'));
-
-      // Act
-      final result = await dataSource.signInWithGoogle();
-
-      // Assert
-      expect(result.isFailure, true);
-      expect(result.error, isA<firebase_auth.FirebaseAuthException>());
+      expect(result.error, exception);
     });
   });
 
   group('signOut', () {
-    test('successfully signs out from Firebase and Google', () async {
+    test('successfully signs out', () async {
       // Arrange
-      when(mockFirebaseAuth.signOut()).thenAnswer((_) async => {});
-      when(mockGoogleSignIn.signOut()).thenAnswer((_) async {});
+      when(mockGotrueClient.signOut()).thenAnswer((_) async => {});
 
       // Act
       final result = await dataSource.signOut();
 
       // Assert
       expect(result.isSuccess, true);
-      verify(mockFirebaseAuth.signOut()).called(1);
-      verify(mockGoogleSignIn.signOut()).called(1);
+      verify(mockGotrueClient.signOut()).called(1);
     });
 
-    test('returns failure when Firebase sign-out throws exception', () async {
+    test('returns failure when signOut throws exception', () async {
       // Arrange
-      when(mockFirebaseAuth.signOut()).thenThrow(Exception('Firebase sign-out failed'));
+      final exception = Exception('Sign out failed');
+      when(mockGotrueClient.signOut()).thenThrow(exception);
 
       // Act
       final result = await dataSource.signOut();
 
       // Assert
       expect(result.isFailure, true);
-      expect(result.error, isA<Exception>());
-      verify(mockFirebaseAuth.signOut()).called(1);
-      verifyNever(mockGoogleSignIn.signOut());
-    });
-
-    test('returns failure when Google sign-out throws exception', () async {
-      // Arrange
-      when(mockFirebaseAuth.signOut()).thenAnswer((_) async => {});
-      when(mockGoogleSignIn.signOut()).thenThrow(Exception('Google sign-out failed'));
-
-      // Act
-      final result = await dataSource.signOut();
-
-      // Assert
-      expect(result.isFailure, true);
-      expect(result.error, isA<Exception>());
-      verify(mockFirebaseAuth.signOut()).called(1);
-      verify(mockGoogleSignIn.signOut()).called(1);
+      expect(result.error, exception);
     });
   });
 
@@ -236,14 +148,18 @@ void main() {
       mockUser = MockUser();
     });
 
-    test('returns UserModel when user is signed in', () async {
+    test('returns UserModel when a user is signed in', () async {
       // Arrange
-      when(mockFirebaseAuth.currentUser).thenReturn(mockUser);
-      when(mockUser.uid).thenReturn('test_uid');
+      when(mockGotrueClient.currentUser).thenReturn(mockUser);
+      when(mockUser.id).thenReturn('test_uid');
       when(mockUser.email).thenReturn('test@example.com');
-      when(mockUser.displayName).thenReturn('Test User');
-      when(mockUser.photoURL).thenReturn('https://example.com/photo.jpg');
-      when(mockUser.phoneNumber).thenReturn('123');
+      when(mockUser.phone).thenReturn('123456');
+      when(mockUser.userMetadata).thenReturn({
+        'name': 'Test User',
+        'avatar_url': 'https://example.com/avatar.png',
+      });
+      when(mockUser.createdAt).thenReturn(DateTime.now().toIso8601String());
+      when(mockUser.updatedAt).thenReturn(DateTime.now().toIso8601String());
 
       // Act
       final result = await dataSource.getCurrentUser();
@@ -253,12 +169,11 @@ void main() {
       expect(result.data, isA<UserModel>());
       expect(result.data?.id, 'test_uid');
       expect(result.data?.email, 'test@example.com');
-      expect(result.data?.phone, '123');
     });
 
     test('returns null when no user is signed in', () async {
       // Arrange
-      when(mockFirebaseAuth.currentUser).thenReturn(null);
+      when(mockGotrueClient.currentUser).thenReturn(null);
 
       // Act
       final result = await dataSource.getCurrentUser();
@@ -268,16 +183,17 @@ void main() {
       expect(result.data, null);
     });
 
-    test('returns failure when getting current user throws exception', () async {
+    test('returns failure when getCurrentUser throws exception', () async {
       // Arrange
-      when(mockFirebaseAuth.currentUser).thenThrow(Exception('Failed to get current user'));
+      final exception = Exception('Failed to get current user');
+      when(mockGotrueClient.currentUser).thenThrow(exception);
 
       // Act
       final result = await dataSource.getCurrentUser();
 
       // Assert
       expect(result.isFailure, true);
-      expect(result.error, isA<Exception>());
+      expect(result.error, exception);
     });
   });
 }

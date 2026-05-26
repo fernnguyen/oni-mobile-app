@@ -3,10 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/di/app_providers.dart';
 import '../../../../core/constants/constants.dart';
+import '../../../../core/themes/app_colors.dart';
 import '../../../../core/themes/app_sizes.dart';
 import '../../../providers/auth/auth_notifier.dart';
 import '../../../widgets/app_button.dart';
 import '../../../widgets/app_dialog.dart';
+import '../../../widgets/brand_logo.dart';
 
 class Shop {
   final String id;
@@ -56,15 +58,84 @@ class _ShopSelectScreenState extends ConsumerState<ShopSelectScreen> {
         _errorMessage = null;
       });
 
-      final supabaseClient = ref.read(supabaseClientProvider);
+      final sharedPreferences = ref.read(sharedPreferencesProvider);
+      final savedSubdomain = sharedPreferences.getString(Constants.selectedSubdomainKey) ?? '';
 
-      // Lấy danh sách các cửa hàng được phân quyền trực tiếp từ view shops_view
+      if (savedSubdomain.isEmpty) {
+        setState(() {
+          _errorMessage = 'Không tìm thấy thông tin subdomain doanh nghiệp. Vui lòng đăng nhập lại.';
+          _isLoading = false;
+        });
+        return;
+      }
+
+      final supabaseClient = ref.read(supabaseClientProvider);
+      final userId = supabaseClient.auth.currentUser?.id;
+
+      if (userId == null) {
+        setState(() {
+          _errorMessage = 'Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.';
+          _isLoading = false;
+        });
+        return;
+      }
+
+      // 1. Lấy tenant_id từ tenants table theo slug = savedSubdomain
+      final tenantRes = await supabaseClient
+          .from('tenants')
+          .select('id')
+          .eq('slug', savedSubdomain)
+          .maybeSingle();
+
+      if (tenantRes == null) {
+        setState(() {
+          _errorMessage = 'Không tìm thấy doanh nghiệp với subdomain "$savedSubdomain". Vui lòng kiểm tra lại.';
+          _isLoading = false;
+        });
+        return;
+      }
+
+      final String tenantId = tenantRes['id'] as String;
+
+      // 2. Kiểm tra xem user có phải là owner/admin ở tenant này không (user_tenants)
+      final userTenantRes = await supabaseClient
+          .from('user_tenants')
+          .select('role_id')
+          .eq('user_id', userId)
+          .eq('tenant_id', tenantId)
+          .maybeSingle();
+
+      final bool isTenantOwner = userTenantRes != null;
+
+      // 3. Lấy danh sách shops được phân quyền ở user_shops (nếu không phải là owner/admin)
+      final Set<String> allowedShopIds = {};
+      if (!isTenantOwner) {
+        final List<dynamic> userShopsRes = await supabaseClient
+            .from('user_shops')
+            .select('shop_id')
+            .eq('user_id', userId);
+        for (var item in userShopsRes) {
+          if (item['shop_id'] != null) {
+            allowedShopIds.add(item['shop_id'] as String);
+          }
+        }
+      }
+
+      // 4. Lấy danh sách tất cả shops thuộc tenant này
       final List<dynamic> response = await supabaseClient
           .from('shops_view')
-          .select('id, name, slug, address');
+          .select('id, name, slug, address')
+          .eq('tenant_id', tenantId);
 
+      final List<Shop> loadedShops = response.map((data) => Shop.fromJson(data)).toList();
+
+      // 5. Lọc danh sách shops tương ứng
       setState(() {
-        _shops = response.map((data) => Shop.fromJson(data)).toList();
+        if (isTenantOwner) {
+          _shops = loadedShops;
+        } else {
+          _shops = loadedShops.where((shop) => allowedShopIds.contains(shop.id)).toList();
+        }
         _isLoading = false;
       });
     } catch (e) {
@@ -119,11 +190,11 @@ class _ShopSelectScreenState extends ConsumerState<ShopSelectScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Chọn Cửa Hàng / Chi Nhánh'),
+        title: const Text('Chọn Chi Nhánh'),
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout_rounded),
+            icon: const Icon(Icons.logout_rounded, color: Colors.grey),
             tooltip: 'Đăng xuất',
             onPressed: _handleLogout,
           ),
@@ -131,24 +202,24 @@ class _ShopSelectScreenState extends ConsumerState<ShopSelectScreen> {
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(AppSizes.padding),
+          padding: const EdgeInsets.symmetric(horizontal: AppSizes.padding * 1.2),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                'Chào mừng bạn đến với hệ thống!',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Vui lòng chọn chi nhánh làm việc bên dưới để bắt đầu ca bán hàng.',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
+              const SizedBox(height: 16),
+              // Unified Brand Logo for consistency
+              const Center(
+                child: BrandLogo(size: 60, fontSize: 20),
               ),
               const SizedBox(height: AppSizes.padding * 1.5),
+              Text(
+                'Vui lòng chọn chi nhánh làm việc bên dưới để bắt đầu ca bán hàng:',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 16),
               Expanded(
                 child: _buildBody(theme),
               ),
@@ -162,152 +233,218 @@ class _ShopSelectScreenState extends ConsumerState<ShopSelectScreen> {
   Widget _buildBody(ThemeData theme) {
     if (_isLoading) {
       return const Center(
-        child: CircularProgressIndicator(),
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+        ),
       );
     }
 
     if (_errorMessage != null) {
       return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.error_outline_rounded,
-              size: 48,
-              color: theme.colorScheme.error,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              _errorMessage!,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyLarge?.copyWith(
-                color: theme.colorScheme.error,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(AppSizes.padding),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.errorContainer.withOpacity(0.4),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.error_outline_rounded,
+                  size: 44,
+                  color: theme.colorScheme.error,
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: _fetchShops,
-              icon: const Icon(Icons.refresh_rounded),
-              label: const Text('Thử lại'),
-            ),
-          ],
+              const SizedBox(height: 16),
+              Text(
+                _errorMessage!,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: theme.colorScheme.error,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: _fetchShops,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                icon: const Icon(Icons.refresh_rounded),
+                label: const Text('Thử lại'),
+              ),
+            ],
+          ),
         ),
       );
     }
 
     if (_shops.isEmpty) {
       return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.storefront_outlined,
-              size: 64,
-              color: Colors.grey,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Tài khoản của bạn chưa được phân quyền truy cập chi nhánh nào.',
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyLarge?.copyWith(
-                color: Colors.grey[600],
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(AppSizes.padding),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.grey.withOpacity(0.08),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.storefront_outlined,
+                  size: 64,
+                  color: Colors.grey,
+                ),
               ),
-            ),
-            const SizedBox(height: AppSizes.padding),
-            AppButton(
-              text: 'ĐĂNG XUẤT',
-              onTap: _handleLogout,
-            ),
-          ],
+              const SizedBox(height: 20),
+              Text(
+                'Chưa được phân quyền chi nhánh',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Tài khoản của bạn chưa được cấp quyền truy cập chi nhánh nào thuộc doanh nghiệp này.',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: Colors.grey[600],
+                ),
+              ),
+              const SizedBox(height: AppSizes.padding * 1.5),
+              AppButton(
+                text: 'ĐĂNG XUẤT TÀI KHOẢN',
+                onTap: _handleLogout,
+              ),
+            ],
+          ),
         ),
       );
     }
 
     return ListView.separated(
       itemCount: _shops.length,
-      separatorBuilder: (context, index) => const SizedBox(height: 12),
+      padding: const EdgeInsets.only(bottom: AppSizes.padding * 1.5),
+      separatorBuilder: (context, index) => const SizedBox(height: 14),
       itemBuilder: (context, index) {
         final shop = _shops[index];
-        return Card(
-          elevation: 2,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-            side: BorderSide(
-              color: theme.colorScheme.outlineVariant.withOpacity(0.5),
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: Colors.grey.withOpacity(0.08),
+              width: 1.2,
             ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.02),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-          child: InkWell(
-            onTap: () => _selectShop(shop),
-            borderRadius: BorderRadius.circular(16),
-            child: Padding(
-              padding: const EdgeInsets.all(AppSizes.padding),
-              child: Row(
-                children: [
-                  Container(
-                    width: 52,
-                    height: 52,
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      Icons.store_rounded,
-                      size: 28,
-                      color: theme.colorScheme.primary,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          shop.name,
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () => _selectShop(shop),
+              borderRadius: BorderRadius.circular(18),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 18,
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 54,
+                      height: 54,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: const Center(
+                        child: Icon(
+                          Icons.store_rounded,
+                          size: 28,
+                          color: AppColors.primary,
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Mã định danh: ${shop.slug}',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            shop.name,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
                           ),
-                        ),
-                        if (shop.address != null &&
-                            shop.address!.isNotEmpty) ...[
                           const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.location_on_outlined,
-                                size: 14,
-                                color: Colors.grey,
-                              ),
-                              const SizedBox(width: 4),
-                              Expanded(
-                                child: Text(
-                                  shop.address!,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: Colors.grey[600],
+                          Text(
+                            'Slug: ${shop.slug}',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant.withOpacity(0.7),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          if (shop.address != null &&
+                              shop.address!.isNotEmpty) ...[
+                            const SizedBox(height: 6),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Icon(
+                                  Icons.location_on_rounded,
+                                  size: 13,
+                                  color: AppColors.primary,
+                                ),
+                                const SizedBox(width: 4),
+                                Expanded(
+                                  child: Text(
+                                    shop.address!,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: Colors.grey[600],
+                                      height: 1.2,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
+                              ],
+                            ),
+                          ],
                         ],
-                      ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Icon(
-                    Icons.arrow_forward_ios_rounded,
-                    size: 16,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ],
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.withOpacity(0.06),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.arrow_forward_ios_rounded,
+                        size: 12,
+                        color: theme.colorScheme.onSurfaceVariant.withOpacity(0.8),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

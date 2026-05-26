@@ -16,8 +16,8 @@ class AppTheme {
   Color? _secondaryColor = AppColors.charcoal;
   Color? _tertiaryColor = AppColors.plum;
   Brightness _brightness = Brightness.light;
-  TextTheme _primaryTextTheme = GoogleFonts.latoTextTheme();
-  TextTheme _secondaryTextTheme = GoogleFonts.poppinsTextTheme();
+  TextTheme _primaryTextTheme = GoogleFonts.interTextTheme();
+  TextTheme _secondaryTextTheme = GoogleFonts.interTextTheme();
 
   ThemeData init({
     Color? primaryColor,
@@ -31,7 +31,7 @@ class AppTheme {
     _primaryColor = primaryColor ?? _primaryColor;
     _secondaryColor = secondaryColor ?? _secondaryColor;
     _tertiaryColor = tertiaryColor ?? _tertiaryColor;
-    _brightness = brightness ?? _brightness;
+    _brightness = Brightness.light; // Luôn luôn là giao diện sáng
     _primaryTextTheme = primaryTextTheme ?? _primaryTextTheme;
     _secondaryTextTheme = secondaryTextTheme ?? _secondaryTextTheme;
 
@@ -69,14 +69,18 @@ class AppTheme {
       colorScheme: colorScheme,
       brightness: brightness,
       visualDensity: VisualDensity.adaptivePlatformDensity,
-      scaffoldBackgroundColor: colorScheme.surfaceContainerLowest,
+      scaffoldBackgroundColor: brightness == Brightness.light
+          ? AppColors.backgroundLight
+          : colorScheme.surfaceContainerLowest,
       textTheme: textTheme.apply(
         bodyColor: colorScheme.onSurface,
         displayColor: colorScheme.onSurface,
         decorationColor: colorScheme.onSurface,
       ),
       appBarTheme: AppBarTheme(
-        backgroundColor: colorScheme.surfaceContainerLowest,
+        backgroundColor: brightness == Brightness.light
+            ? AppColors.backgroundLight
+            : colorScheme.surfaceContainerLowest,
         shadowColor: colorScheme.surfaceContainerHighest,
         elevation: 0.5,
         scrolledUnderElevation: 0.5,

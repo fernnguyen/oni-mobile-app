@@ -1,5 +1,7 @@
 import '../../domain/entities/ordered_product_entity.dart';
 
+import '../../core/utilities/stable_hash.dart';
+
 class OrderedProductModel {
   int id;
   int transactionId;
@@ -87,10 +89,14 @@ class OrderedProductModel {
 
   /// Khởi tạo OrderedProductModel từ JSON của Backend NextJS ERP
   factory OrderedProductModel.fromBackendJson(Map<String, dynamic> json) {
+    final String rawId = json['id']?.toString() ?? '';
+    final String rawOrderId = json['order_id']?.toString() ?? '';
+    final String rawProductId = json['product_id']?.toString() ?? '';
+
     return OrderedProductModel(
-      id: int.tryParse(json['id']?.toString() ?? '') ?? json['id'].hashCode,
-      transactionId: int.tryParse(json['order_id']?.toString() ?? '') ?? json['order_id'].hashCode,
-      productId: int.tryParse(json['product_id']?.toString() ?? '') ?? json['product_id'].hashCode,
+      id: int.tryParse(rawId) ?? getStableHashCode(rawId),
+      transactionId: int.tryParse(rawOrderId) ?? getStableHashCode(rawOrderId),
+      productId: int.tryParse(rawProductId) ?? getStableHashCode(rawProductId),
       quantity: double.tryParse(json['qty']?.toString() ?? '')?.toInt() ?? 0,
       stock: 0,
       name: json['product_name']?.toString() ?? '',

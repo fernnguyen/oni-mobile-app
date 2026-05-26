@@ -128,7 +128,10 @@ class AppRoutes {
     return ShellRoute(
       navigatorKey: navNavigatorKey,
       builder: (BuildContext context, GoRouterState state, Widget child) {
-        return MainScreen(child: child);
+        return MainScreen(
+          location: state.uri.path,
+          child: child,
+        );
       },
       routes: [
         _home(),

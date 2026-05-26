@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/common/result.dart';
 import '../../../core/constants/constants.dart';
 import '../../../core/services/network/api_client.dart';
+import '../../../core/utilities/stable_hash.dart';
 import '../../models/ordered_product_model.dart';
 import '../../models/transaction_model.dart';
 import '../../models/user_model.dart';
@@ -41,7 +42,7 @@ class TransactionRemoteDatasourceImpl extends TransactionDatasource {
 
       // Lấy id đơn hàng được tạo từ Backend NextJS ERP
       final createdId = res.data?['id'] ?? res.data?['order_id'];
-      final intId = int.tryParse(createdId?.toString() ?? '') ?? transaction.id;
+      final intId = int.tryParse(createdId?.toString() ?? '') ?? (createdId != null ? getStableHashCode(createdId.toString()) : transaction.id);
 
       return Result.success(data: intId);
     } catch (e) {

@@ -2,6 +2,8 @@ import '../../domain/entities/transaction_entity.dart';
 import 'ordered_product_model.dart';
 import 'user_model.dart';
 
+import '../../core/utilities/stable_hash.dart';
+
 class TransactionModel {
   int id;
   String paymentMethod;
@@ -113,8 +115,9 @@ class TransactionModel {
     UserModel user,
     List<OrderedProductModel> items,
   ) {
+    final String rawId = json['id']?.toString() ?? '';
     return TransactionModel(
-      id: int.tryParse(json['id']?.toString() ?? '') ?? json['id'].hashCode,
+      id: int.tryParse(rawId) ?? getStableHashCode(rawId),
       paymentMethod: json['payment_method'] == 'cash' ? 'Cash' : 'Bank Transfer',
       customerName: json['customer_name']?.toString(),
       description: json['note']?.toString(),

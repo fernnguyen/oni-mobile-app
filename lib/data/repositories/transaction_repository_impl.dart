@@ -148,6 +148,15 @@ class TransactionRepositoryImpl extends TransactionRepository {
       if (pingService.isConnected) {
         final remote = await transactionRemoteDatasource.createTransaction(data);
         if (remote.isFailure) return Result.failure(error: remote.error!);
+
+        if (remote.data != local.data) {
+          // Xoá giao dịch tạm thời cũ cùng chi tiết sản phẩm liên quan ở SQLite local
+          await transactionLocalDatasource.deleteTransaction(local.data!);
+          // Cập nhật ID mới và lưu lại bản ghi đồng bộ chính xác
+          data.id = remote.data!;
+          await transactionLocalDatasource.createTransaction(data);
+        }
+        return Result.success(data: remote.data!);
       } else {
         final res = await queuedActionLocalDatasource.createQueuedAction(
           QueuedActionModel(

@@ -3,10 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/di/app_providers.dart';
 import '../../../../core/constants/constants.dart';
+import '../../../../core/themes/app_colors.dart';
 import '../../../../core/themes/app_sizes.dart';
 import '../../../providers/auth/auth_notifier.dart';
 import '../../../widgets/app_button.dart';
 import '../../../widgets/app_dialog.dart';
+import '../../../widgets/brand_logo.dart';
 
 class SignInScreen extends ConsumerStatefulWidget {
   const SignInScreen({super.key});
@@ -84,29 +86,9 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Logo/Header Area
-                  const Icon(
-                    Icons.store_mall_directory_rounded,
-                    size: 80,
-                    color: Colors.blueAccent,
-                  ),
                   const SizedBox(height: AppSizes.padding),
-                  Text(
-                    'ONI ERP POS',
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.2,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Đăng nhập hệ thống quản lý chi nhánh',
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
+                  // Premium Brand Logo Widget
+                  const BrandLogo(size: 84, fontSize: 30),
                   const SizedBox(height: AppSizes.padding * 2),
 
                   // Subdomain Input Field
@@ -115,14 +97,37 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                     decoration: InputDecoration(
                       labelText: 'Doanh nghiệp (Subdomain)',
                       hintText: 'ten-doanh-nghiep',
-                      prefixIcon: const Icon(Icons.domain_rounded),
+                      prefixIcon: const Icon(
+                        Icons.domain_rounded,
+                        color: AppColors.primary,
+                      ),
                       suffixText: '.oni.vn',
                       suffixStyle: theme.textTheme.bodyLarge?.copyWith(
-                        color: Colors.blueAccent,
+                        color: AppColors.primary,
                         fontWeight: FontWeight.bold,
                       ),
-                      border: const OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(12)),
+                      filled: true,
+                      fillColor: theme.brightness == Brightness.light
+                          ? Colors.white
+                          : theme.colorScheme.surfaceContainerHigh,
+                      border: OutlineInputBorder(
+                        borderRadius: const BorderRadius.all(Radius.circular(14)),
+                        borderSide: BorderSide(
+                          color: theme.colorScheme.outline.withOpacity(0.3),
+                        ),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: const BorderRadius.all(Radius.circular(14)),
+                        borderSide: BorderSide(
+                          color: theme.colorScheme.outline.withOpacity(0.3),
+                        ),
+                      ),
+                      focusedBorder: const OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(14)),
+                        borderSide: BorderSide(
+                          color: AppColors.primary,
+                          width: 2.0,
+                        ),
                       ),
                     ),
                     keyboardType: TextInputType.text,
@@ -139,12 +144,35 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                   // Email/Username Input Field
                   TextFormField(
                     controller: _emailController,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Tài khoản (Email)',
                       hintText: 'email@example.com',
-                      prefixIcon: const Icon(Icons.email_outlined),
+                      prefixIcon: const Icon(
+                        Icons.email_outlined,
+                        color: AppColors.primary,
+                      ),
+                      filled: true,
+                      fillColor: theme.brightness == Brightness.light
+                          ? Colors.white
+                          : theme.colorScheme.surfaceContainerHigh,
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(12)),
+                        borderRadius: const BorderRadius.all(Radius.circular(14)),
+                        borderSide: BorderSide(
+                          color: theme.colorScheme.outline.withOpacity(0.3),
+                        ),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: const BorderRadius.all(Radius.circular(14)),
+                        borderSide: BorderSide(
+                          color: theme.colorScheme.outline.withOpacity(0.3),
+                        ),
+                      ),
+                      focusedBorder: const OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(14)),
+                        borderSide: BorderSide(
+                          color: AppColors.primary,
+                          width: 2.0,
+                        ),
                       ),
                     ),
                     keyboardType: TextInputType.emailAddress,
@@ -164,10 +192,14 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                     obscureText: _obscurePassword,
                     decoration: InputDecoration(
                       labelText: 'Mật khẩu',
-                      prefixIcon: const Icon(Icons.lock_outline_rounded),
+                      prefixIcon: const Icon(
+                        Icons.lock_outline_rounded,
+                        color: AppColors.primary,
+                      ),
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                          color: Colors.grey,
                         ),
                         onPressed: () {
                           setState(() {
@@ -175,8 +207,28 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                           });
                         },
                       ),
-                      border: const OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(12)),
+                      filled: true,
+                      fillColor: theme.brightness == Brightness.light
+                          ? Colors.white
+                          : theme.colorScheme.surfaceContainerHigh,
+                      border: OutlineInputBorder(
+                        borderRadius: const BorderRadius.all(Radius.circular(14)),
+                        borderSide: BorderSide(
+                          color: theme.colorScheme.outline.withOpacity(0.3),
+                        ),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: const BorderRadius.all(Radius.circular(14)),
+                        borderSide: BorderSide(
+                          color: theme.colorScheme.outline.withOpacity(0.3),
+                        ),
+                      ),
+                      focusedBorder: const OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(14)),
+                        borderSide: BorderSide(
+                          color: AppColors.primary,
+                          width: 2.0,
+                        ),
                       ),
                     ),
                     textInputAction: TextInputAction.done,
@@ -188,13 +240,14 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: AppSizes.padding * 1.5),
+                  const SizedBox(height: AppSizes.padding * 2),
 
                   // Submit Button
                   AppButton(
-                    text: 'ĐĂNG NHẬP',
+                    text: 'ĐĂNG NHẬP HỆ THỐNG',
                     onTap: _handleSignIn,
                   ),
+                  const SizedBox(height: AppSizes.padding),
                 ],
               ),
             ),

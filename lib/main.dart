@@ -15,10 +15,27 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize Supabase
-  if (Constants.supabaseUrl.isNotEmpty && Constants.supabaseAnonKey.isNotEmpty) {
+  String rawUrl = Constants.supabaseUrl.trim();
+  String rawAnonKey = Constants.supabaseAnonKey.trim();
+
+  // Loại bỏ dấu nháy kép hoặc nháy đơn bao quanh nếu có (do lỗi escape khi truyền qua --dart-define)
+  if (rawUrl.startsWith('"') && rawUrl.endsWith('"')) {
+    rawUrl = rawUrl.substring(1, rawUrl.length - 1);
+  }
+  if (rawAnonKey.startsWith('"') && rawAnonKey.endsWith('"')) {
+    rawAnonKey = rawAnonKey.substring(1, rawAnonKey.length - 1);
+  }
+  if (rawUrl.startsWith("'") && rawUrl.endsWith("'")) {
+    rawUrl = rawUrl.substring(1, rawUrl.length - 1);
+  }
+  if (rawAnonKey.startsWith("'") && rawAnonKey.endsWith("'")) {
+    rawAnonKey = rawAnonKey.substring(1, rawAnonKey.length - 1);
+  }
+
+  if (rawUrl.isNotEmpty && rawAnonKey.isNotEmpty) {
     await Supabase.initialize(
-      url: Constants.supabaseUrl,
-      anonKey: Constants.supabaseAnonKey,
+      url: rawUrl,
+      anonKey: rawAnonKey,
     );
   }
 
@@ -30,6 +47,20 @@ void main() async {
 
   // Initialize shared preferences
   final sharedPreferences = await SharedPreferences.getInstance();
+
+  // One-time SQLite cache migration: clear out old unstable hashcode IDs
+  final hasMigrated = sharedPreferences.getBool('stable_hash_migrated_v2') ?? false;
+  if (!hasMigrated) {
+    try {
+      final db = DatabaseService.instance.database;
+      await db.delete('Product');
+      await db.delete('Transaction');
+      await db.delete('OrderedProduct');
+      await sharedPreferences.setBool('stable_hash_migrated_v2', true);
+    } catch (_) {
+      // In case table deletion fails on clean installs, ignore
+    }
+  }
 
   // Set/lock screen orientation
   await SystemChrome.setPreferredOrientations([]);

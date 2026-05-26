@@ -1,5 +1,7 @@
 import '../../domain/entities/product_entity.dart';
 
+import '../../core/utilities/stable_hash.dart';
+
 class ProductModel {
   int id;
   String createdById;
@@ -87,8 +89,9 @@ class ProductModel {
 
   /// Khởi tạo ProductModel từ định dạng JSON của Backend NextJS ERP
   factory ProductModel.fromBackendJson(Map<String, dynamic> json, String userId) {
+    final String rawId = json['id']?.toString() ?? '';
     return ProductModel(
-      id: int.tryParse(json['id']?.toString() ?? '') ?? json['id'].hashCode,
+      id: int.tryParse(rawId) ?? getStableHashCode(rawId),
       createdById: userId,
       name: json['name']?.toString() ?? '',
       imageUrl: json['image_url']?.toString() ?? '',

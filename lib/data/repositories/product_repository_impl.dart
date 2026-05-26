@@ -148,6 +148,15 @@ class ProductRepositoryImpl extends ProductRepository {
       if (pingService.isConnected) {
         final remote = await productRemoteDatasource.createProduct(data);
         if (remote.isFailure) return Result.failure(error: remote.error!);
+
+        if (remote.data != local.data) {
+          // Gỡ bỏ bản ghi tạm thời cũ ở SQLite local
+          await productLocalDatasource.deleteProduct(local.data!);
+          // Lưu lại bản ghi mới với ID remote ổn định
+          data.id = remote.data!;
+          await productLocalDatasource.createProduct(data);
+        }
+        return Result.success(data: remote.data!);
       } else {
         final res = await queuedActionLocalDatasource.createQueuedAction(
           QueuedActionModel(

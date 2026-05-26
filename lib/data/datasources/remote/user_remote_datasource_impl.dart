@@ -3,11 +3,16 @@ import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 import '../../../core/common/result.dart';
 import '../../models/user_model.dart';
 import '../interfaces/user_datasource.dart';
+import '../../../core/services/network/api_client.dart';
 
 class UserRemoteDatasourceImpl extends UserDatasource {
   final supabase.SupabaseClient supabaseClient;
+  final ApiClient apiClient;
 
-  UserRemoteDatasourceImpl(this.supabaseClient);
+  UserRemoteDatasourceImpl({
+    required this.supabaseClient,
+    required this.apiClient,
+  });
 
   @override
   Future<Result<String>> createUser(UserModel user) async {
@@ -24,15 +29,6 @@ class UserRemoteDatasourceImpl extends UserDatasource {
             },
           ),
         );
-      }
-      try {
-        await supabaseClient.from('tenant_user_profiles').upsert({
-          'user_id': user.id,
-          'display_name': user.name,
-          'login_email': user.email ?? '',
-        });
-      } catch (_) {
-        // RLS might block client direct inserts
       }
       return Result.success(data: user.id);
     } catch (e) {
@@ -55,14 +51,6 @@ class UserRemoteDatasourceImpl extends UserDatasource {
             },
           ),
         );
-      }
-      try {
-        await supabaseClient
-            .from('tenant_user_profiles')
-            .update({'display_name': user.name})
-            .eq('user_id', user.id);
-      } catch (_) {
-        // RLS might block client direct updates
       }
       return Result.success(data: null);
     } catch (e) {
@@ -90,50 +78,15 @@ class UserRemoteDatasourceImpl extends UserDatasource {
     try {
       final currentUser = supabaseClient.auth.currentUser;
       if (currentUser != null && currentUser.id == id) {
-        final profile = await supabaseClient
-            .from('tenant_user_profiles')
-            .select()
-            .eq('user_id', id)
-            .maybeSingle();
-
-        if (profile != null) {
-          return Result.success(
-            data: UserModel(
-              id: id,
-              email: profile['login_email'] ?? currentUser.email,
-              name:
-                  profile['display_name'] ?? currentUser.userMetadata?['name'],
-              phone: currentUser.phone ?? currentUser.userMetadata?['phone'],
-              gender: currentUser.userMetadata?['gender'],
-              birthdate: currentUser.userMetadata?['birthdate'],
-              imageUrl: currentUser.userMetadata?['avatar_url'],
-              createdAt: profile['created_at'] ?? currentUser.createdAt,
-              updatedAt: currentUser.updatedAt,
-            ),
-          );
-        }
-        return Result.success(data: UserModel.fromSupabaseUser(currentUser));
+        final result = await apiClient.get<UserModel?>(
+          '/api/auth/me',
+          fromJson: (json) => json['user'] != null ? UserModel.fromJson(json['user']) : null,
+        );
+        return result;
       }
 
-      final profile = await supabaseClient
-          .from('tenant_user_profiles')
-          .select()
-          .eq('user_id', id)
-          .maybeSingle();
-
-      if (profile == null) {
-        return Result.success(data: null);
-      }
-
-      return Result.success(
-        data: UserModel(
-          id: id,
-          email: profile['login_email'],
-          name: profile['display_name'],
-          createdAt: profile['created_at'],
-          updatedAt: profile['created_at'],
-        ),
-      );
+      // Fallback for other users (not typically queried in POS client)
+      return Result.success(data: null);
     } catch (e) {
       return Result.failure(error: e);
     }

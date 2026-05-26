@@ -8,9 +8,16 @@ import 'package:flutter_pos/presentation/providers/main/main_notifier.dart';
 import 'package:flutter_pos/presentation/providers/main/main_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   late AppRoutes routes;
+  late SharedPreferences sharedPrefs;
+
+  setUp(() async {
+    SharedPreferences.setMockInitialValues({});
+    sharedPrefs = await SharedPreferences.getInstance();
+  });
 
   Widget createTestWidget({
     AuthState authState = const AuthState(),
@@ -28,6 +35,7 @@ void main() {
 
     return ProviderScope(
       overrides: [
+        sharedPreferencesProvider.overrideWithValue(sharedPrefs),
         authNotifierProvider.overrideWith(() {
           return _FakeAuthNotifier(authState);
         }),
@@ -53,9 +61,10 @@ void main() {
       await tester.pumpAndSettle();
 
       // assert
-      expect(find.text('Welcome!'), findsOneWidget);
-      expect(find.text('Welcome to Flutter POS app'), findsOneWidget);
-      expect(find.text('Sign In With Google'), findsOneWidget);
+      expect(find.text('Doanh nghiệp (Subdomain)'), findsOneWidget);
+      expect(find.text('Tài khoản (Email)'), findsOneWidget);
+      expect(find.text('Mật khẩu'), findsOneWidget);
+      expect(find.text('ĐĂNG NHẬP HỆ THỐNG'), findsOneWidget);
     });
 
     testWidgets('should display sign in button', (tester) async {
@@ -64,7 +73,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // assert
-      final button = find.text('Sign In With Google');
+      final button = find.text('ĐĂNG NHẬP HỆ THỐNG');
       expect(button, findsOneWidget);
     });
   });

@@ -3,17 +3,23 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i3;
+import 'dart:async' as _i5;
 
-import 'package:flutter_pos/core/common/result.dart' as _i5;
-import 'package:flutter_pos/core/services/connectivity/ping_service.dart' as _i2;
-import 'package:flutter_pos/data/datasources/local/queued_action_local_datasource_impl.dart' as _i9;
-import 'package:flutter_pos/data/datasources/local/transaction_local_datasource_impl.dart' as _i4;
-import 'package:flutter_pos/data/datasources/remote/transaction_remote_datasource_impl.dart' as _i8;
-import 'package:flutter_pos/data/models/queued_action_model.dart' as _i10;
-import 'package:flutter_pos/data/models/transaction_model.dart' as _i6;
+import 'package:flutter_pos/core/common/result.dart' as _i7;
+import 'package:flutter_pos/core/services/connectivity/ping_service.dart'
+    as _i2;
+import 'package:flutter_pos/core/services/network/api_client.dart' as _i3;
+import 'package:flutter_pos/data/datasources/local/queued_action_local_datasource_impl.dart'
+    as _i11;
+import 'package:flutter_pos/data/datasources/local/transaction_local_datasource_impl.dart'
+    as _i6;
+import 'package:flutter_pos/data/datasources/remote/transaction_remote_datasource_impl.dart'
+    as _i10;
+import 'package:flutter_pos/data/models/queued_action_model.dart' as _i12;
+import 'package:flutter_pos/data/models/transaction_model.dart' as _i8;
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:mockito/src/dummies.dart' as _i7;
+import 'package:mockito/src/dummies.dart' as _i9;
+import 'package:shared_preferences/shared_preferences.dart' as _i4;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -30,7 +36,19 @@ import 'package:mockito/src/dummies.dart' as _i7;
 // ignore_for_file: subtype_of_sealed_class
 
 class _FakePingData_0 extends _i1.SmartFake implements _i2.PingData {
-  _FakePingData_0(Object parent, Invocation parentInvocation) : super(parent, parentInvocation);
+  _FakePingData_0(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeApiClient_1 extends _i1.SmartFake implements _i3.ApiClient {
+  _FakeApiClient_1(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeSharedPreferences_2 extends _i1.SmartFake
+    implements _i4.SharedPreferences {
+  _FakeSharedPreferences_2(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
 }
 
 /// A class which mocks [PingService].
@@ -42,10 +60,12 @@ class MockPingService extends _i1.Mock implements _i2.PingService {
   }
 
   @override
-  bool get isConnected => (super.noSuchMethod(Invocation.getter(#isConnected), returnValue: false) as bool);
+  bool get isConnected =>
+      (super.noSuchMethod(Invocation.getter(#isConnected), returnValue: false)
+          as bool);
 
   @override
-  _i3.Future<void> startPing({
+  _i5.Future<void> startPing({
     String? host = '8.8.8.8',
     int? count,
     int? interval = 1,
@@ -62,22 +82,24 @@ class MockPingService extends _i1.Mock implements _i2.PingService {
               #pingLatencyToleranceCount: pingLatencyToleranceCount,
               #maxLines: maxLines,
             }),
-            returnValue: _i3.Future<void>.value(),
-            returnValueForMissingStub: _i3.Future<void>.value(),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
           )
-          as _i3.Future<void>);
+          as _i5.Future<void>);
 
   @override
-  void addListener(dynamic Function(List<int>, List<String>)? listener) => super.noSuchMethod(
-    Invocation.method(#addListener, [listener]),
-    returnValueForMissingStub: null,
-  );
+  void addListener(dynamic Function(List<int>, List<String>)? listener) =>
+      super.noSuchMethod(
+        Invocation.method(#addListener, [listener]),
+        returnValueForMissingStub: null,
+      );
 
   @override
-  void removeListener(dynamic Function(List<int>, List<String>)? listener) => super.noSuchMethod(
-    Invocation.method(#removeListener, [listener]),
-    returnValueForMissingStub: null,
-  );
+  void removeListener(dynamic Function(List<int>, List<String>)? listener) =>
+      super.noSuchMethod(
+        Invocation.method(#removeListener, [listener]),
+        returnValueForMissingStub: null,
+      );
 
   @override
   void clearListeners() => super.noSuchMethod(
@@ -86,16 +108,18 @@ class MockPingService extends _i1.Mock implements _i2.PingService {
   );
 
   @override
-  void addConnectionStatusListener(dynamic Function(bool)? listener) => super.noSuchMethod(
-    Invocation.method(#addConnectionStatusListener, [listener]),
-    returnValueForMissingStub: null,
-  );
+  void addConnectionStatusListener(dynamic Function(bool)? listener) =>
+      super.noSuchMethod(
+        Invocation.method(#addConnectionStatusListener, [listener]),
+        returnValueForMissingStub: null,
+      );
 
   @override
-  void removeConnectionStatusListener(dynamic Function(bool)? listener) => super.noSuchMethod(
-    Invocation.method(#removeConnectionStatusListener, [listener]),
-    returnValueForMissingStub: null,
-  );
+  void removeConnectionStatusListener(dynamic Function(bool)? listener) =>
+      super.noSuchMethod(
+        Invocation.method(#removeConnectionStatusListener, [listener]),
+        returnValueForMissingStub: null,
+      );
 
   @override
   void clearConnectionStatusListeners() => super.noSuchMethod(
@@ -130,84 +154,86 @@ class MockPingService extends _i1.Mock implements _i2.PingService {
 /// A class which mocks [TransactionLocalDatasourceImpl].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockTransactionLocalDatasourceImpl extends _i1.Mock implements _i4.TransactionLocalDatasourceImpl {
+class MockTransactionLocalDatasourceImpl extends _i1.Mock
+    implements _i6.TransactionLocalDatasourceImpl {
   MockTransactionLocalDatasourceImpl() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i3.Future<_i5.Result<int>> createTransaction(
-    _i6.TransactionModel? transaction,
+  _i5.Future<_i7.Result<int>> createTransaction(
+    _i8.TransactionModel? transaction,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#createTransaction, [transaction]),
-            returnValue: _i3.Future<_i5.Result<int>>.value(
-              _i7.dummyValue<_i5.Result<int>>(
+            returnValue: _i5.Future<_i7.Result<int>>.value(
+              _i9.dummyValue<_i7.Result<int>>(
                 this,
                 Invocation.method(#createTransaction, [transaction]),
               ),
             ),
           )
-          as _i3.Future<_i5.Result<int>>);
+          as _i5.Future<_i7.Result<int>>);
 
   @override
-  _i3.Future<_i5.Result<void>> updateTransaction(
-    _i6.TransactionModel? transaction,
+  _i5.Future<_i7.Result<void>> updateTransaction(
+    _i8.TransactionModel? transaction,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#updateTransaction, [transaction]),
-            returnValue: _i3.Future<_i5.Result<void>>.value(
-              _i7.dummyValue<_i5.Result<void>>(
+            returnValue: _i5.Future<_i7.Result<void>>.value(
+              _i9.dummyValue<_i7.Result<void>>(
                 this,
                 Invocation.method(#updateTransaction, [transaction]),
               ),
             ),
           )
-          as _i3.Future<_i5.Result<void>>);
+          as _i5.Future<_i7.Result<void>>);
 
   @override
-  _i3.Future<_i5.Result<void>> deleteTransaction(int? id) =>
+  _i5.Future<_i7.Result<void>> deleteTransaction(int? id) =>
       (super.noSuchMethod(
             Invocation.method(#deleteTransaction, [id]),
-            returnValue: _i3.Future<_i5.Result<void>>.value(
-              _i7.dummyValue<_i5.Result<void>>(
+            returnValue: _i5.Future<_i7.Result<void>>.value(
+              _i9.dummyValue<_i7.Result<void>>(
                 this,
                 Invocation.method(#deleteTransaction, [id]),
               ),
             ),
           )
-          as _i3.Future<_i5.Result<void>>);
+          as _i5.Future<_i7.Result<void>>);
 
   @override
-  _i3.Future<_i5.Result<_i6.TransactionModel?>> getTransaction(int? id) =>
+  _i5.Future<_i7.Result<_i8.TransactionModel?>> getTransaction(int? id) =>
       (super.noSuchMethod(
             Invocation.method(#getTransaction, [id]),
-            returnValue: _i3.Future<_i5.Result<_i6.TransactionModel?>>.value(
-              _i7.dummyValue<_i5.Result<_i6.TransactionModel?>>(
+            returnValue: _i5.Future<_i7.Result<_i8.TransactionModel?>>.value(
+              _i9.dummyValue<_i7.Result<_i8.TransactionModel?>>(
                 this,
                 Invocation.method(#getTransaction, [id]),
               ),
             ),
           )
-          as _i3.Future<_i5.Result<_i6.TransactionModel?>>);
+          as _i5.Future<_i7.Result<_i8.TransactionModel?>>);
 
   @override
-  _i3.Future<_i5.Result<List<_i6.TransactionModel>>> getAllUserTransactions(
+  _i5.Future<_i7.Result<List<_i8.TransactionModel>>> getAllUserTransactions(
     String? userId,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#getAllUserTransactions, [userId]),
-            returnValue: _i3.Future<_i5.Result<List<_i6.TransactionModel>>>.value(
-              _i7.dummyValue<_i5.Result<List<_i6.TransactionModel>>>(
-                this,
-                Invocation.method(#getAllUserTransactions, [userId]),
-              ),
-            ),
+            returnValue:
+                _i5.Future<_i7.Result<List<_i8.TransactionModel>>>.value(
+                  _i9.dummyValue<_i7.Result<List<_i8.TransactionModel>>>(
+                    this,
+                    Invocation.method(#getAllUserTransactions, [userId]),
+                  ),
+                ),
           )
-          as _i3.Future<_i5.Result<List<_i6.TransactionModel>>>);
+          as _i5.Future<_i7.Result<List<_i8.TransactionModel>>>);
 
   @override
-  _i3.Future<_i5.Result<List<_i6.TransactionModel>>> getUserTransactions(
+  _i5.Future<_i7.Result<List<_i8.TransactionModel>>> getUserTransactions(
     String? userId, {
     String? orderBy = 'createdAt',
     String? sortBy = 'DESC',
@@ -227,107 +253,140 @@ class MockTransactionLocalDatasourceImpl extends _i1.Mock implements _i4.Transac
                 #contains: contains,
               },
             ),
-            returnValue: _i3.Future<_i5.Result<List<_i6.TransactionModel>>>.value(
-              _i7.dummyValue<_i5.Result<List<_i6.TransactionModel>>>(
-                this,
-                Invocation.method(
-                  #getUserTransactions,
-                  [userId],
-                  {
-                    #orderBy: orderBy,
-                    #sortBy: sortBy,
-                    #limit: limit,
-                    #offset: offset,
-                    #contains: contains,
-                  },
+            returnValue:
+                _i5.Future<_i7.Result<List<_i8.TransactionModel>>>.value(
+                  _i9.dummyValue<_i7.Result<List<_i8.TransactionModel>>>(
+                    this,
+                    Invocation.method(
+                      #getUserTransactions,
+                      [userId],
+                      {
+                        #orderBy: orderBy,
+                        #sortBy: sortBy,
+                        #limit: limit,
+                        #offset: offset,
+                        #contains: contains,
+                      },
+                    ),
+                  ),
                 ),
-              ),
-            ),
           )
-          as _i3.Future<_i5.Result<List<_i6.TransactionModel>>>);
+          as _i5.Future<_i7.Result<List<_i8.TransactionModel>>>);
 }
 
 /// A class which mocks [TransactionRemoteDatasourceImpl].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockTransactionRemoteDatasourceImpl extends _i1.Mock implements _i8.TransactionRemoteDatasourceImpl {
+class MockTransactionRemoteDatasourceImpl extends _i1.Mock
+    implements _i10.TransactionRemoteDatasourceImpl {
   MockTransactionRemoteDatasourceImpl() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i3.Future<_i5.Result<int>> createTransaction(
-    _i6.TransactionModel? transaction,
+  _i3.ApiClient get apiClient =>
+      (super.noSuchMethod(
+            Invocation.getter(#apiClient),
+            returnValue: _FakeApiClient_1(this, Invocation.getter(#apiClient)),
+          )
+          as _i3.ApiClient);
+
+  @override
+  _i4.SharedPreferences get sharedPreferences =>
+      (super.noSuchMethod(
+            Invocation.getter(#sharedPreferences),
+            returnValue: _FakeSharedPreferences_2(
+              this,
+              Invocation.getter(#sharedPreferences),
+            ),
+          )
+          as _i4.SharedPreferences);
+
+  @override
+  String get shopId =>
+      (super.noSuchMethod(
+            Invocation.getter(#shopId),
+            returnValue: _i9.dummyValue<String>(
+              this,
+              Invocation.getter(#shopId),
+            ),
+          )
+          as String);
+
+  @override
+  _i5.Future<_i7.Result<int>> createTransaction(
+    _i8.TransactionModel? transaction,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#createTransaction, [transaction]),
-            returnValue: _i3.Future<_i5.Result<int>>.value(
-              _i7.dummyValue<_i5.Result<int>>(
+            returnValue: _i5.Future<_i7.Result<int>>.value(
+              _i9.dummyValue<_i7.Result<int>>(
                 this,
                 Invocation.method(#createTransaction, [transaction]),
               ),
             ),
           )
-          as _i3.Future<_i5.Result<int>>);
+          as _i5.Future<_i7.Result<int>>);
 
   @override
-  _i3.Future<_i5.Result<void>> updateTransaction(
-    _i6.TransactionModel? transaction,
+  _i5.Future<_i7.Result<void>> updateTransaction(
+    _i8.TransactionModel? transaction,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#updateTransaction, [transaction]),
-            returnValue: _i3.Future<_i5.Result<void>>.value(
-              _i7.dummyValue<_i5.Result<void>>(
+            returnValue: _i5.Future<_i7.Result<void>>.value(
+              _i9.dummyValue<_i7.Result<void>>(
                 this,
                 Invocation.method(#updateTransaction, [transaction]),
               ),
             ),
           )
-          as _i3.Future<_i5.Result<void>>);
+          as _i5.Future<_i7.Result<void>>);
 
   @override
-  _i3.Future<_i5.Result<void>> deleteTransaction(int? id) =>
+  _i5.Future<_i7.Result<void>> deleteTransaction(int? id) =>
       (super.noSuchMethod(
             Invocation.method(#deleteTransaction, [id]),
-            returnValue: _i3.Future<_i5.Result<void>>.value(
-              _i7.dummyValue<_i5.Result<void>>(
+            returnValue: _i5.Future<_i7.Result<void>>.value(
+              _i9.dummyValue<_i7.Result<void>>(
                 this,
                 Invocation.method(#deleteTransaction, [id]),
               ),
             ),
           )
-          as _i3.Future<_i5.Result<void>>);
+          as _i5.Future<_i7.Result<void>>);
 
   @override
-  _i3.Future<_i5.Result<_i6.TransactionModel?>> getTransaction(int? id) =>
+  _i5.Future<_i7.Result<_i8.TransactionModel?>> getTransaction(int? id) =>
       (super.noSuchMethod(
             Invocation.method(#getTransaction, [id]),
-            returnValue: _i3.Future<_i5.Result<_i6.TransactionModel?>>.value(
-              _i7.dummyValue<_i5.Result<_i6.TransactionModel?>>(
+            returnValue: _i5.Future<_i7.Result<_i8.TransactionModel?>>.value(
+              _i9.dummyValue<_i7.Result<_i8.TransactionModel?>>(
                 this,
                 Invocation.method(#getTransaction, [id]),
               ),
             ),
           )
-          as _i3.Future<_i5.Result<_i6.TransactionModel?>>);
+          as _i5.Future<_i7.Result<_i8.TransactionModel?>>);
 
   @override
-  _i3.Future<_i5.Result<List<_i6.TransactionModel>>> getAllUserTransactions(
+  _i5.Future<_i7.Result<List<_i8.TransactionModel>>> getAllUserTransactions(
     String? userId,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#getAllUserTransactions, [userId]),
-            returnValue: _i3.Future<_i5.Result<List<_i6.TransactionModel>>>.value(
-              _i7.dummyValue<_i5.Result<List<_i6.TransactionModel>>>(
-                this,
-                Invocation.method(#getAllUserTransactions, [userId]),
-              ),
-            ),
+            returnValue:
+                _i5.Future<_i7.Result<List<_i8.TransactionModel>>>.value(
+                  _i9.dummyValue<_i7.Result<List<_i8.TransactionModel>>>(
+                    this,
+                    Invocation.method(#getAllUserTransactions, [userId]),
+                  ),
+                ),
           )
-          as _i3.Future<_i5.Result<List<_i6.TransactionModel>>>);
+          as _i5.Future<_i7.Result<List<_i8.TransactionModel>>>);
 
   @override
-  _i3.Future<_i5.Result<List<_i6.TransactionModel>>> getUserTransactions(
+  _i5.Future<_i7.Result<List<_i8.TransactionModel>>> getUserTransactions(
     String? userId, {
     String? orderBy = 'createdAt',
     String? sortBy = 'DESC',
@@ -347,85 +406,89 @@ class MockTransactionRemoteDatasourceImpl extends _i1.Mock implements _i8.Transa
                 #contains: contains,
               },
             ),
-            returnValue: _i3.Future<_i5.Result<List<_i6.TransactionModel>>>.value(
-              _i7.dummyValue<_i5.Result<List<_i6.TransactionModel>>>(
-                this,
-                Invocation.method(
-                  #getUserTransactions,
-                  [userId],
-                  {
-                    #orderBy: orderBy,
-                    #sortBy: sortBy,
-                    #limit: limit,
-                    #offset: offset,
-                    #contains: contains,
-                  },
+            returnValue:
+                _i5.Future<_i7.Result<List<_i8.TransactionModel>>>.value(
+                  _i9.dummyValue<_i7.Result<List<_i8.TransactionModel>>>(
+                    this,
+                    Invocation.method(
+                      #getUserTransactions,
+                      [userId],
+                      {
+                        #orderBy: orderBy,
+                        #sortBy: sortBy,
+                        #limit: limit,
+                        #offset: offset,
+                        #contains: contains,
+                      },
+                    ),
+                  ),
                 ),
-              ),
-            ),
           )
-          as _i3.Future<_i5.Result<List<_i6.TransactionModel>>>);
+          as _i5.Future<_i7.Result<List<_i8.TransactionModel>>>);
 }
 
 /// A class which mocks [QueuedActionLocalDatasourceImpl].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockQueuedActionLocalDatasourceImpl extends _i1.Mock implements _i9.QueuedActionLocalDatasourceImpl {
+class MockQueuedActionLocalDatasourceImpl extends _i1.Mock
+    implements _i11.QueuedActionLocalDatasourceImpl {
   MockQueuedActionLocalDatasourceImpl() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i3.Future<_i5.Result<int>> createQueuedAction(
-    _i10.QueuedActionModel? queue,
+  _i5.Future<_i7.Result<int>> createQueuedAction(
+    _i12.QueuedActionModel? queue,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#createQueuedAction, [queue]),
-            returnValue: _i3.Future<_i5.Result<int>>.value(
-              _i7.dummyValue<_i5.Result<int>>(
+            returnValue: _i5.Future<_i7.Result<int>>.value(
+              _i9.dummyValue<_i7.Result<int>>(
                 this,
                 Invocation.method(#createQueuedAction, [queue]),
               ),
             ),
           )
-          as _i3.Future<_i5.Result<int>>);
+          as _i5.Future<_i7.Result<int>>);
 
   @override
-  _i3.Future<_i5.Result<void>> deleteQueuedAction(int? id) =>
+  _i5.Future<_i7.Result<void>> deleteQueuedAction(int? id) =>
       (super.noSuchMethod(
             Invocation.method(#deleteQueuedAction, [id]),
-            returnValue: _i3.Future<_i5.Result<void>>.value(
-              _i7.dummyValue<_i5.Result<void>>(
+            returnValue: _i5.Future<_i7.Result<void>>.value(
+              _i9.dummyValue<_i7.Result<void>>(
                 this,
                 Invocation.method(#deleteQueuedAction, [id]),
               ),
             ),
           )
-          as _i3.Future<_i5.Result<void>>);
+          as _i5.Future<_i7.Result<void>>);
 
   @override
-  _i3.Future<_i5.Result<_i10.QueuedActionModel?>> getQueuedAction(int? id) =>
+  _i5.Future<_i7.Result<_i12.QueuedActionModel?>> getQueuedAction(int? id) =>
       (super.noSuchMethod(
             Invocation.method(#getQueuedAction, [id]),
-            returnValue: _i3.Future<_i5.Result<_i10.QueuedActionModel?>>.value(
-              _i7.dummyValue<_i5.Result<_i10.QueuedActionModel?>>(
+            returnValue: _i5.Future<_i7.Result<_i12.QueuedActionModel?>>.value(
+              _i9.dummyValue<_i7.Result<_i12.QueuedActionModel?>>(
                 this,
                 Invocation.method(#getQueuedAction, [id]),
               ),
             ),
           )
-          as _i3.Future<_i5.Result<_i10.QueuedActionModel?>>);
+          as _i5.Future<_i7.Result<_i12.QueuedActionModel?>>);
 
   @override
-  _i3.Future<_i5.Result<List<_i10.QueuedActionModel>>> getAllUserQueuedAction() =>
+  _i5.Future<_i7.Result<List<_i12.QueuedActionModel>>>
+  getAllUserQueuedAction() =>
       (super.noSuchMethod(
             Invocation.method(#getAllUserQueuedAction, []),
-            returnValue: _i3.Future<_i5.Result<List<_i10.QueuedActionModel>>>.value(
-              _i7.dummyValue<_i5.Result<List<_i10.QueuedActionModel>>>(
-                this,
-                Invocation.method(#getAllUserQueuedAction, []),
-              ),
-            ),
+            returnValue:
+                _i5.Future<_i7.Result<List<_i12.QueuedActionModel>>>.value(
+                  _i9.dummyValue<_i7.Result<List<_i12.QueuedActionModel>>>(
+                    this,
+                    Invocation.method(#getAllUserQueuedAction, []),
+                  ),
+                ),
           )
-          as _i3.Future<_i5.Result<List<_i10.QueuedActionModel>>>);
+          as _i5.Future<_i7.Result<List<_i12.QueuedActionModel>>>);
 }

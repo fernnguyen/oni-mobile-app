@@ -7,10 +7,12 @@ import '../welcome/welcome_screen.dart';
 
 class MainScreen extends ConsumerStatefulWidget {
   final Widget child;
+  final String location;
 
   const MainScreen({
     super.key,
     required this.child,
+    required this.location,
   });
 
   @override
@@ -73,7 +75,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   }
 
   int _calculateSelectedIndex() {
-    final String location = ref.read(appRoutesProvider).router.state.uri.path;
+    final String location = widget.location;
 
     if (location.startsWith('/home')) {
       return 0;

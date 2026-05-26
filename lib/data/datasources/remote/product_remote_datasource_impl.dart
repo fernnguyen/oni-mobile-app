@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/common/result.dart';
 import '../../../core/constants/constants.dart';
 import '../../../core/services/network/api_client.dart';
+import '../../../core/utilities/stable_hash.dart';
 import '../../models/product_model.dart';
 import '../interfaces/product_datasource.dart';
 
@@ -37,7 +38,7 @@ class ProductRemoteDatasourceImpl extends ProductDatasource {
 
       // Lấy id trả về của sản phẩm (NextJS ERP trả về dạng string id)
       final createdId = res.data?['product_id'] ?? res.data?['id'];
-      final intId = int.tryParse(createdId?.toString() ?? '') ?? product.id;
+      final intId = int.tryParse(createdId?.toString() ?? '') ?? (createdId != null ? getStableHashCode(createdId.toString()) : product.id);
 
       return Result.success(data: intId);
     } catch (e) {
