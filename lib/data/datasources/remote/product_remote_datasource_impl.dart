@@ -1,20 +1,45 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/common/result.dart';
+import '../../../core/constants/constants.dart';
+import '../../../core/services/network/api_client.dart';
 import '../../models/product_model.dart';
 import '../interfaces/product_datasource.dart';
 
 class ProductRemoteDatasourceImpl extends ProductDatasource {
-  final FirebaseFirestore _firebaseFirestore;
+  final ApiClient apiClient;
+  final SharedPreferences sharedPreferences;
 
-  ProductRemoteDatasourceImpl(this._firebaseFirestore);
+  ProductRemoteDatasourceImpl({
+    required this.apiClient,
+    required this.sharedPreferences,
+  });
+
+  /// Lấy mã shopId hiện hành từ SharedPreferences
+  String get shopId {
+    final id = sharedPreferences.getString(Constants.selectedShopIdKey) ?? '';
+    if (id.isEmpty) {
+      throw Exception('Chưa chọn chi nhánh làm việc (shopId).');
+    }
+    return id;
+  }
 
   @override
   Future<Result<int>> createProduct(ProductModel product) async {
     try {
-      await _firebaseFirestore.collection('Product').doc("${product.id}").set(product.toJson());
-      // The id has been generated in models
-      return Result.success(data: product.id);
+      final res = await apiClient.post<Map<String, dynamic>>(
+        '/api/shops/$shopId/products',
+        body: product.toBackendJson(),
+        fromJson: (json) => json as Map<String, dynamic>,
+      );
+
+      if (res.isFailure) return Result.failure(error: res.error!);
+
+      // Lấy id trả về của sản phẩm (NextJS ERP trả về dạng string id)
+      final createdId = res.data?['product_id'] ?? res.data?['id'];
+      final intId = int.tryParse(createdId?.toString() ?? '') ?? product.id;
+
+      return Result.success(data: intId);
     } catch (e) {
       return Result.failure(error: e);
     }
@@ -23,11 +48,11 @@ class ProductRemoteDatasourceImpl extends ProductDatasource {
   @override
   Future<Result<void>> updateProduct(ProductModel product) async {
     try {
-      await _firebaseFirestore
-          .collection('Product')
-          .doc("${product.id}")
-          .set(product.toJson(), SetOptions(merge: true));
-
+      final res = await apiClient.put<void>(
+        '/api/shops/$shopId/products/${product.id}',
+        body: product.toBackendJson(),
+      );
+      if (res.isFailure) return Result.failure(error: res.error!);
       return Result.success(data: null);
     } catch (e) {
       return Result.failure(error: e);
@@ -37,7 +62,10 @@ class ProductRemoteDatasourceImpl extends ProductDatasource {
   @override
   Future<Result<void>> deleteProduct(int id) async {
     try {
-      await _firebaseFirestore.collection('Product').doc("$id").delete();
+      final res = await apiClient.delete<void>(
+        '/api/shops/$shopId/products/$id',
+      );
+      if (res.isFailure) return Result.failure(error: res.error!);
       return Result.success(data: null);
     } catch (e) {
       return Result.failure(error: e);
@@ -47,9 +75,18 @@ class ProductRemoteDatasourceImpl extends ProductDatasource {
   @override
   Future<Result<ProductModel?>> getProduct(int id) async {
     try {
-      var res = await _firebaseFirestore.collection('Product').doc("$id").get();
-      if (res.data() == null) return Result.success(data: null);
-      return Result.success(data: ProductModel.fromJson(res.data()!));
+      final res = await apiClient.get<Map<String, dynamic>>(
+        '/api/shops/$shopId/products/$id',
+        fromJson: (json) => json as Map<String, dynamic>,
+      );
+
+      if (res.isFailure) return Result.failure(error: res.error!);
+      if (res.data == null) return Result.success(data: null);
+
+      final currentUserId = apiClient.supabaseClient.auth.currentUser?.id ?? '';
+      return Result.success(
+        data: ProductModel.fromBackendJson(res.data!, currentUserId),
+      );
     } catch (e) {
       return Result.failure(error: e);
     }
@@ -58,8 +95,17 @@ class ProductRemoteDatasourceImpl extends ProductDatasource {
   @override
   Future<Result<List<ProductModel>>> getAllUserProducts(String userId) async {
     try {
-      var res = await _firebaseFirestore.collection('Product').where('createdById', isEqualTo: userId).get();
-      var products = res.docs.map((e) => ProductModel.fromJson(e.data())).toList();
+      // Gọi API tải tối đa 2000 sản phẩm phục vụ offline sync/cache
+      final res = await apiClient.get<Map<String, dynamic>>(
+        '/api/shops/$shopId/products?limit=2000',
+        fromJson: (json) => json as Map<String, dynamic>,
+      );
+
+      if (res.isFailure) return Result.failure(error: res.error!);
+
+      final List<dynamic> list = res.data?['data'] ?? [];
+      final products = list.map((e) => ProductModel.fromBackendJson(e, userId)).toList();
+
       return Result.success(data: products);
     } catch (e) {
       return Result.failure(error: e);
@@ -76,38 +122,25 @@ class ProductRemoteDatasourceImpl extends ProductDatasource {
     String? contains,
   }) async {
     try {
-      // Because firestore doesn't support numeric offset
-      // Instead, use query cursors. Get last document snapshot then pass it to startAfterDocument
-      // https://firebase.google.com/docs/firestore/query-data/query-cursors
+      final page = offset != null ? (offset / limit).toInt() + 1 : 1;
 
-      var query = _firebaseFirestore
-          .collection('Product')
-          .where('createdById', isEqualTo: userId)
-          .where('name', arrayContains: contains)
-          .orderBy(orderBy, descending: sortBy == 'DESC')
-          .limit(limit);
+      final queryParams = Uri(
+        queryParameters: {
+          'page': page.toString(),
+          'limit': limit.toString(),
+          if (contains != null && contains.isNotEmpty) 'search': contains,
+        },
+      ).query;
 
-      if (offset != null) {
-        DocumentSnapshot<Object?>? lastSnapshot;
+      final res = await apiClient.get<Map<String, dynamic>>(
+        '/api/shops/$shopId/products?$queryParams',
+        fromJson: (json) => json as Map<String, dynamic>,
+      );
 
-        var temp = await _firebaseFirestore
-            .collection('Product')
-            .where('createdById', isEqualTo: userId)
-            .orderBy(orderBy, descending: sortBy == 'DESC')
-            .limit(offset)
-            .get();
+      if (res.isFailure) return Result.failure(error: res.error!);
 
-        lastSnapshot = temp.docs.lastOrNull;
-
-        if (lastSnapshot != null) {
-          query = query.startAfterDocument(lastSnapshot);
-        } else {
-          return Result.success(data: []);
-        }
-      }
-
-      var rawProducts = await query.get();
-      var products = rawProducts.docs.map((e) => ProductModel.fromJson(e.data())).toList();
+      final List<dynamic> list = res.data?['data'] ?? [];
+      final products = list.map((e) => ProductModel.fromBackendJson(e, userId)).toList();
 
       return Result.success(data: products);
     } catch (e) {

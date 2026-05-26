@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../di/app_providers.dart';
+import '../../core/constants/constants.dart';
 import '../../presentation/providers/auth/auth_notifier.dart';
 import '../../presentation/screens/account/about_screen.dart';
 import '../../presentation/screens/account/account_screen.dart';
 import '../../presentation/screens/account/printer_settings_screen.dart';
 import '../../presentation/screens/account/profile_form_screen.dart';
+import '../../presentation/screens/auth/shop_select/shop_select_screen.dart';
 import '../../presentation/screens/auth/sign_in/sign_in_screen.dart';
 import '../../presentation/screens/error/error_screen.dart';
 import '../../presentation/screens/home/home_screen.dart';
@@ -57,6 +60,7 @@ class AppRoutes {
         final isAuthenticated = authState.isAuthenticated;
         final isSplashRoute = state.fullPath == '/';
         final isAuthRoute = state.fullPath?.startsWith('/sign-in') ?? false;
+        final isShopSelectRoute = state.fullPath?.startsWith('/shop-select') ?? false;
 
         if (isChecking) {
           return '/';
@@ -66,8 +70,17 @@ class AppRoutes {
           return '/sign-in';
         }
 
-        if (isAuthenticated && isAuthRoute) {
-          return '/home';
+        if (isAuthenticated) {
+          final hasSelectedShop =
+              _ref.read(sharedPreferencesProvider).getString(Constants.selectedShopIdKey)?.isNotEmpty ?? false;
+
+          if (!hasSelectedShop && !isShopSelectRoute) {
+            return '/shop-select';
+          }
+
+          if (hasSelectedShop && (isAuthRoute || isShopSelectRoute)) {
+            return '/home';
+          }
         }
 
         return isSplashRoute ? '/home' : null;
@@ -76,6 +89,7 @@ class AppRoutes {
         _splash(),
         _main(),
         _signIn(),
+        _shopSelect(),
         _error(),
       ],
     );
@@ -261,6 +275,13 @@ class AppRoutes {
       builder: (context, state) {
         return const PrinterSettingsScreen();
       },
+    );
+  }
+
+  GoRoute _shopSelect() {
+    return GoRoute(
+      path: '/shop-select',
+      builder: (context, state) => const ShopSelectScreen(),
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ExternalLauncher {
@@ -27,7 +28,7 @@ class ExternalLauncher {
     var iosUrl = "https://wa.me/$phone?text=${Uri.parse(message)}";
 
     try {
-      if (Platform.isIOS) {
+      if (!kIsWeb && Platform.isIOS) {
         await launchUrl(Uri.parse(iosUrl));
       } else {
         await launchUrl(Uri.parse(androidUrl));
@@ -38,7 +39,8 @@ class ExternalLauncher {
   }
 
   static Future<void> openMap(double latitude, double longitude) async {
-    String googleUrl = 'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
+    String googleUrl =
+        'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
 
     if (!await launchUrl(Uri.parse(googleUrl))) {
       throw Exception('Could open map url $googleUrl');

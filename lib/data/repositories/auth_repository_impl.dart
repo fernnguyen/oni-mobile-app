@@ -11,9 +11,13 @@ class AuthRepositoryImpl implements AuthRepository {
   });
 
   @override
-  Future<Result<UserEntity>> signInWithGoogle() async {
+  Future<Result<UserEntity>> signInWithEmailAndPassword(
+    String subdomain,
+    String email,
+    String password,
+  ) async {
     try {
-      final res = await authRemoteDataSource.signInWithGoogle();
+      final res = await authRemoteDataSource.signInWithEmailAndPassword(subdomain, email, password);
       if (res.isFailure) return Result.failure(error: res.error!);
 
       return Result.success(data: res.data!.toEntity());

@@ -66,9 +66,11 @@ dependencies:
   firebase_core_platform_interface: ^6.0.2
   device_info_plus: ^12.2.0
   sqflite_common_ffi: ^2.3.3
+  supabase_flutter: ^2.8.0
   shared_preferences: ^2.3.5
   permission_handler: ^12.0.1
   unified_esc_pos_printer: ^3.0.0
+  sqflite_common_ffi_web: ^1.0.2
 
 dev_dependencies:
   flutter_test:

@@ -7,6 +7,7 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import '../../utilities/console_logger.dart';
 import 'database_config.dart';
+import 'web_database_mock.dart';
 
 class DatabaseService {
   DatabaseService._internal();
@@ -18,26 +19,27 @@ class DatabaseService {
   late Database database;
 
   Future<void> init() async {
-    if (Platform.isWindows || Platform.isLinux) {
-      // Initialize FFI
-      sqfliteFfiInit();
+    if (kIsWeb) {
+      // Use zero-setup pure-Dart in-memory Database Mock for Web/Chrome testing
+      database = FakeWebDatabase();
+    } else {
+      if (Platform.isWindows || Platform.isLinux) {
+        // Initialize FFI for desktop platforms
+        sqfliteFfiInit();
+        databaseFactory = databaseFactoryFfi;
+      }
+      // Get the path to the database
+      final path = join(await getDatabasesPath(), DatabaseConfig.dbPath);
+
+      // Create database if not exists
+      File databaseFile = File(path);
+      if (!await databaseFile.exists()) {
+        await databaseFile.create();
+      }
+
+      // Open database
+      database = await openDatabase(path);
     }
-
-    // Get the path to the database
-    String path = join(await getDatabasesPath(), DatabaseConfig.dbPath);
-
-    if (kDebugMode) {
-      // Only for development purpose
-      // await dropDatabase(path);
-    }
-
-    // Create database if not exists
-    File databaseFile = File(path);
-
-    if (!await databaseFile.exists()) await databaseFile.create();
-
-    // Open database
-    database = await openDatabase(path);
 
     // Create tables
     await Future.wait([

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import '../../utilities/console_logger.dart';
 
 class PingService {
@@ -25,6 +26,9 @@ class PingService {
   bool _previousStatus = false;
 
   bool get isConnected {
+    if (kIsWeb) {
+      return true; // Web assumes connected for testing
+    }
     if (_pingLatencies.isEmpty) {
       return false; // No latencies to check, assume not connected
     }
@@ -59,8 +63,22 @@ class PingService {
     _count = count;
     _interval = interval;
     _maxPingLatencyTolerance = maxPingLatencyTolerance;
-    _pingLatencyToleranceCount = count != null && count < pingLatencyToleranceCount ? count : pingLatencyToleranceCount;
+    _pingLatencyToleranceCount =
+        count != null && count < pingLatencyToleranceCount
+        ? count
+        : pingLatencyToleranceCount;
     _maxLines = maxLines;
+
+    if (kIsWeb) {
+      // Trigger status check immediately on Web
+      if (_previousStatus != isConnected) {
+        _previousStatus = isConnected;
+        for (var e in _connectionStatusListeners) {
+          e.call(isConnected);
+        }
+      }
+      return;
+    }
 
     if (_process != null) return;
     if (_isProcessStarted) return;
@@ -69,6 +87,7 @@ class PingService {
   }
 
   Future<void> _runPingProcess() async {
+    if (kIsWeb) return;
     _isProcessStarted = true;
 
     try {
@@ -78,9 +97,15 @@ class PingService {
         environment: {'LANG': 'en_US'},
       );
 
-      _process?.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen(_pingListener);
+      _process?.stdout
+          .transform(utf8.decoder)
+          .transform(const LineSplitter())
+          .listen(_pingListener);
 
-      _process?.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen(_pingListener);
+      _process?.stderr
+          .transform(utf8.decoder)
+          .transform(const LineSplitter())
+          .listen(_pingListener);
 
       int? exitCode = await _process?.exitCode;
       cl('Ping process stopped. exitCode: $exitCode');
@@ -132,7 +157,9 @@ class PingService {
   }
 
   // Unregister the listener
-  void removeListener(Function(List<int> latencies, List<String> lines) listener) {
+  void removeListener(
+    Function(List<int> latencies, List<String> lines) listener,
+  ) {
     _listeners.remove(listener);
   }
 
@@ -184,7 +211,9 @@ class PingService {
       caseSensitive: false,
     );
 
-    final response = Platform.isWindows ? windowsResponseRgx.firstMatch(line) : linuxBasedResponseRgx.firstMatch(line);
+    final response = Platform.isWindows
+        ? windowsResponseRgx.firstMatch(line)
+        : linuxBasedResponseRgx.firstMatch(line);
     if (response != null) {
       String ip;
       String bytes;

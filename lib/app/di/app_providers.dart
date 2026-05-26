@@ -6,11 +6,13 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/services/connectivity/ping_service.dart';
 import '../../core/services/database/database_service.dart';
 import '../../core/services/info/device_info_service.dart';
 import '../../core/services/logger/error_logger_service.dart';
+import '../../core/services/network/api_client.dart';
 import '../../core/services/printer/printer_service.dart';
 import '../../data/datasources/local/product_local_datasource_impl.dart';
 import '../../data/datasources/local/queued_action_local_datasource_impl.dart';
@@ -37,22 +39,41 @@ import '../routes/app_routes.dart';
 
 // Startup overrides
 final sharedPreferencesProvider = Provider<SharedPreferences>(
-  (ref) => throw UnimplementedError('sharedPreferencesProvider must be overridden at app startup.'),
+  (ref) => throw UnimplementedError(
+    'sharedPreferencesProvider must be overridden at app startup.',
+  ),
 );
 
 // Third parties
-final firebaseFirestoreProvider = Provider<FirebaseFirestore>((ref) => FirebaseFirestore.instance);
-final firebaseStorageProvider = Provider<FirebaseStorage>((ref) => FirebaseStorage.instance);
-final firebaseCrashlyticsProvider = Provider<FirebaseCrashlytics>((ref) => FirebaseCrashlytics.instance);
-final firebaseAuthProvider = Provider<FirebaseAuth>((ref) => FirebaseAuth.instance);
-final googleSignInProvider = Provider<GoogleSignIn>((ref) => GoogleSignIn.instance);
-final deviceInfoPluginProvider = Provider<DeviceInfoPlugin>((ref) => DeviceInfoPlugin());
+final firebaseFirestoreProvider = Provider<FirebaseFirestore>(
+  (ref) => FirebaseFirestore.instance,
+);
+final firebaseStorageProvider = Provider<FirebaseStorage>(
+  (ref) => FirebaseStorage.instance,
+);
+final firebaseCrashlyticsProvider = Provider<FirebaseCrashlytics>(
+  (ref) => FirebaseCrashlytics.instance,
+);
+final supabaseClientProvider = Provider<SupabaseClient>(
+  (ref) => Supabase.instance.client,
+);
+final firebaseAuthProvider = Provider<FirebaseAuth>(
+  (ref) => FirebaseAuth.instance,
+);
+final googleSignInProvider = Provider<GoogleSignIn>(
+  (ref) => GoogleSignIn.instance,
+);
+final deviceInfoPluginProvider = Provider<DeviceInfoPlugin>(
+  (ref) => DeviceInfoPlugin(),
+);
 
 // Routes
 final appRoutesProvider = Provider<AppRoutes>((ref) => AppRoutes(ref));
 
 // Services
-final databaseServiceProvider = Provider<DatabaseService>((ref) => DatabaseService.instance);
+final databaseServiceProvider = Provider<DatabaseService>(
+  (ref) => DatabaseService.instance,
+);
 final pingServiceProvider = Provider<PingService>((ref) => PingService());
 final deviceInfoServiceProvider = Provider<DeviceInfoService>(
   (ref) => DeviceInfoService(ref.watch(deviceInfoPluginProvider)),
@@ -63,40 +84,59 @@ final errorLoggerServiceProvider = Provider<ErrorLoggerService>(
 final printerServiceProvider = Provider<PrinterService>(
   (ref) => PrinterService(ref.watch(sharedPreferencesProvider)),
 );
+final apiClientProvider = Provider<ApiClient>(
+  (ref) => ApiClient(
+    sharedPreferences: ref.watch(sharedPreferencesProvider),
+    supabaseClient: ref.watch(supabaseClientProvider),
+  ),
+);
 
 // Datasources
 // Local Datasources
 final productLocalDatasourceProvider = Provider<ProductLocalDatasourceImpl>(
   (ref) => ProductLocalDatasourceImpl(ref.watch(databaseServiceProvider)),
 );
-final transactionLocalDatasourceProvider = Provider<TransactionLocalDatasourceImpl>(
-  (ref) => TransactionLocalDatasourceImpl(ref.watch(databaseServiceProvider)),
-);
+final transactionLocalDatasourceProvider =
+    Provider<TransactionLocalDatasourceImpl>(
+      (ref) =>
+          TransactionLocalDatasourceImpl(ref.watch(databaseServiceProvider)),
+    );
 final userLocalDatasourceProvider = Provider<UserLocalDatasourceImpl>(
   (ref) => UserLocalDatasourceImpl(ref.watch(databaseServiceProvider)),
 );
-final queuedActionLocalDatasourceProvider = Provider<QueuedActionLocalDatasourceImpl>(
-  (ref) => QueuedActionLocalDatasourceImpl(ref.watch(databaseServiceProvider)),
-);
+final queuedActionLocalDatasourceProvider =
+    Provider<QueuedActionLocalDatasourceImpl>(
+      (ref) =>
+          QueuedActionLocalDatasourceImpl(ref.watch(databaseServiceProvider)),
+    );
 
 // Remote Datasources
 final authRemoteDataSourceProvider = Provider<AuthRemoteDataSourceImpl>(
   (ref) => AuthRemoteDataSourceImpl(
-    firebaseAuth: ref.watch(firebaseAuthProvider),
-    googleSignIn: ref.watch(googleSignInProvider),
+    supabaseClient: ref.watch(supabaseClientProvider),
   ),
 );
 final storageRemoteDataSourceProvider = Provider<StorageRemoteDataSourceImpl>(
-  (ref) => StorageRemoteDataSourceImpl(ref.watch(firebaseStorageProvider)),
+  (ref) => StorageRemoteDataSourceImpl(
+    apiClient: ref.watch(apiClientProvider),
+    sharedPreferences: ref.watch(sharedPreferencesProvider),
+  ),
 );
 final productRemoteDatasourceProvider = Provider<ProductRemoteDatasourceImpl>(
-  (ref) => ProductRemoteDatasourceImpl(ref.watch(firebaseFirestoreProvider)),
+  (ref) => ProductRemoteDatasourceImpl(
+    apiClient: ref.watch(apiClientProvider),
+    sharedPreferences: ref.watch(sharedPreferencesProvider),
+  ),
 );
-final transactionRemoteDatasourceProvider = Provider<TransactionRemoteDatasourceImpl>(
-  (ref) => TransactionRemoteDatasourceImpl(ref.watch(firebaseFirestoreProvider)),
-);
+final transactionRemoteDatasourceProvider =
+    Provider<TransactionRemoteDatasourceImpl>(
+      (ref) => TransactionRemoteDatasourceImpl(
+        apiClient: ref.watch(apiClientProvider),
+        sharedPreferences: ref.watch(sharedPreferencesProvider),
+      ),
+    );
 final userRemoteDatasourceProvider = Provider<UserRemoteDatasourceImpl>(
-  (ref) => UserRemoteDatasourceImpl(ref.watch(firebaseFirestoreProvider)),
+  (ref) => UserRemoteDatasourceImpl(ref.watch(supabaseClientProvider)),
 );
 
 // Repositories

@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/di/app_providers.dart';
 import '../../../core/common/result.dart';
+import '../../../core/constants/constants.dart';
 import '../../../core/utilities/console_logger.dart';
 import '../../../domain/usecases/auth_usecases.dart';
 import '../../../domain/usecases/params/no_param.dart';
@@ -33,12 +34,26 @@ class AuthNotifier extends Notifier<AuthState> {
     }
   }
 
-  Future<Result<String>> signIn() async {
+  Future<Result<String>> signIn(String subdomain, String email, String password) async {
     final authRepository = ref.read(authRepositoryProvider);
     final userRepository = ref.read(userRepositoryProvider);
 
-    var res = await SignInWithGoogleUsecase(authRepository).call(NoParam());
+    var res = await SignInWithEmailAndPasswordUsecase(authRepository).call(
+      SignInParams(
+        subdomain: subdomain,
+        email: email,
+        password: password,
+      ),
+    );
     if (res.isFailure) return Result.failure(error: res.error!);
+
+    // Lưu subdomain thành công
+    await ref
+        .read(sharedPreferencesProvider)
+        .setString(
+          Constants.selectedSubdomainKey,
+          subdomain,
+        );
 
     var createRes = await CreateUserUsecase(userRepository).call(res.data!);
     if (createRes.isFailure) return Result.failure(error: createRes.error!);

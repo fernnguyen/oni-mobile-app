@@ -1,51 +1,33 @@
-import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
 import '../../../core/common/result.dart';
-import '../../../core/constants/constants.dart';
-import '../../../core/utilities/platform_wrapper.dart';
-import '../../../firebase_options.dart';
 import '../../models/user_model.dart';
 import '../interfaces/auth_datasource.dart';
 
 class AuthRemoteDataSourceImpl implements AuthDataSource {
-  final firebase_auth.FirebaseAuth firebaseAuth;
-  final GoogleSignIn googleSignIn;
+  final supabase.SupabaseClient supabaseClient;
 
   AuthRemoteDataSourceImpl({
-    required this.firebaseAuth,
-    required this.googleSignIn,
+    required this.supabaseClient,
   });
 
   @override
-  Future<Result<UserModel>> signInWithGoogle() async {
+  Future<Result<UserModel>> signInWithEmailAndPassword(
+    String subdomain,
+    String email,
+    String password,
+  ) async {
     try {
-      await googleSignIn.initialize(
-        clientId: PlatformWrapper().isIOS ? DefaultFirebaseOptions.ios.iosClientId : null,
-        serverClientId: Constants.googleServerClientId,
+      final response = await supabaseClient.auth.signInWithPassword(
+        email: email,
+        password: password,
       );
 
-      final googleSignInAccount = await googleSignIn.attemptLightweightAuthentication();
-
-      final googleSignInAuthentication = googleSignInAccount?.authentication;
-
-      final googleSignInAuthorization = await googleSignInAccount?.authorizationClient.authorizationForScopes(
-        Constants.authScopes,
-      );
-
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleSignInAuthorization?.accessToken,
-        idToken: googleSignInAuthentication?.idToken,
-      );
-
-      final userCredential = await firebaseAuth.signInWithCredential(credential);
-
-      if (userCredential.user == null) {
-        return Result.failure(error: 'User data is null after sign-in.');
+      if (response.user == null) {
+        return Result.failure(error: 'Dữ liệu người dùng trống sau khi đăng nhập.');
       }
 
-      return Result.success(data: UserModel.fromFirebaseUser(userCredential.user!));
+      return Result.success(data: UserModel.fromSupabaseUser(response.user!));
     } catch (e) {
       return Result.failure(error: e);
     }
@@ -54,8 +36,7 @@ class AuthRemoteDataSourceImpl implements AuthDataSource {
   @override
   Future<Result<void>> signOut() async {
     try {
-      await firebaseAuth.signOut();
-      await googleSignIn.signOut();
+      await supabaseClient.auth.signOut();
       return Result.success(data: null);
     } catch (e) {
       return Result.failure(error: e);
@@ -65,8 +46,10 @@ class AuthRemoteDataSourceImpl implements AuthDataSource {
   @override
   Future<Result<UserModel?>> getCurrentUser() async {
     try {
-      final firebaseUser = firebaseAuth.currentUser;
-      return Result.success(data: firebaseUser != null ? UserModel.fromFirebaseUser(firebaseUser) : null);
+      final supabaseUser = supabaseClient.auth.currentUser;
+      return Result.success(
+        data: supabaseUser != null ? UserModel.fromSupabaseUser(supabaseUser) : null,
+      );
     } catch (e) {
       return Result.failure(error: e);
     }

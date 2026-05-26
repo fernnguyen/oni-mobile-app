@@ -4,13 +4,26 @@ import '../entities/user_entity.dart';
 import '../repositories/auth_repository.dart';
 import 'params/no_param.dart';
 
-class SignInWithGoogleUsecase extends Usecase<Result, NoParam> {
-  SignInWithGoogleUsecase(this._authRepository);
+class SignInParams {
+  final String subdomain;
+  final String email;
+  final String password;
+
+  SignInParams({
+    required this.subdomain,
+    required this.email,
+    required this.password,
+  });
+}
+
+class SignInWithEmailAndPasswordUsecase extends Usecase<Result, SignInParams> {
+  SignInWithEmailAndPasswordUsecase(this._authRepository);
 
   final AuthRepository _authRepository;
 
   @override
-  Future<Result<UserEntity?>> call(NoParam params) async => _authRepository.signInWithGoogle();
+  Future<Result<UserEntity?>> call(SignInParams params) async =>
+      _authRepository.signInWithEmailAndPassword(params.subdomain, params.email, params.password);
 }
 
 class SignOutUsecase extends Usecase<Result, NoParam> {

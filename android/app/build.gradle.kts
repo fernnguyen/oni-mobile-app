@@ -15,7 +15,7 @@ plugins {
 // }
 
 android {
-    namespace = "com.elriztechnology.flutter_pos"
+    namespace = "vn.oni.posapp"
     compileSdk = 36
     ndkVersion = "28.2.13676358"
 
@@ -29,7 +29,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.elriztechnology.flutter_pos"
+        applicationId = "vn.oni.posapp"
         minSdk = 24
         targetSdk = 36
         versionCode = 11

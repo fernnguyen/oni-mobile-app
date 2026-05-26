@@ -84,4 +84,34 @@ class OrderedProductModel {
       updatedAt: updatedAt,
     );
   }
+
+  /// Khởi tạo OrderedProductModel từ JSON của Backend NextJS ERP
+  factory OrderedProductModel.fromBackendJson(Map<String, dynamic> json) {
+    return OrderedProductModel(
+      id: int.tryParse(json['id']?.toString() ?? '') ?? json['id'].hashCode,
+      transactionId: int.tryParse(json['order_id']?.toString() ?? '') ?? json['order_id'].hashCode,
+      productId: int.tryParse(json['product_id']?.toString() ?? '') ?? json['product_id'].hashCode,
+      quantity: double.tryParse(json['qty']?.toString() ?? '')?.toInt() ?? 0,
+      stock: 0,
+      name: json['product_name']?.toString() ?? '',
+      imageUrl: '',
+      price: double.tryParse(json['unit_price']?.toString() ?? '')?.toInt() ?? 0,
+      createdAt: json['created_at']?.toString(),
+      updatedAt: json['updated_at']?.toString(),
+    );
+  }
+
+  /// Chuyển đổi sang định dạng JSON phù hợp với NextJS ERP Backend
+  Map<String, dynamic> toBackendJson(String orderId, String branchId) {
+    return {
+      'order_id': orderId,
+      'line_no': id.toString(),
+      'product_id': productId.toString(),
+      'product_name': name,
+      'qty': quantity.toString(),
+      'unit_price': price.toString(),
+      'line_total': (quantity * price).toString(),
+      'branch_id': branchId,
+    };
+  }
 }

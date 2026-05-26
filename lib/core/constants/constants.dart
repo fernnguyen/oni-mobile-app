@@ -4,6 +4,12 @@ class Constants {
 
   static const googleServerClientId = String.fromEnvironment('GOOGLE_SERVER_CLIENT_ID');
 
+  static const supabaseUrl = String.fromEnvironment('SUPABASE_URL');
+  static const supabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
+
+  static const String selectedSubdomainKey = 'selected_subdomain';
+  static const String selectedShopIdKey = 'selected_shop_id';
+  static const String selectedShopNameKey = 'selected_shop_name';
   static const String selectedDeviceIdKey = 'selected_device_id';
   static const String selectedConnectionTypeKey = 'selected_connection_type';
   static const String selectedPaperSizeKey = 'selected_paper_size';

@@ -106,4 +106,53 @@ class TransactionModel {
       updatedAt: updatedAt,
     );
   }
+
+  /// Khởi tạo TransactionModel từ JSON của Backend NextJS ERP
+  factory TransactionModel.fromBackendJson(
+    Map<String, dynamic> json,
+    UserModel user,
+    List<OrderedProductModel> items,
+  ) {
+    return TransactionModel(
+      id: int.tryParse(json['id']?.toString() ?? '') ?? json['id'].hashCode,
+      paymentMethod: json['payment_method'] == 'cash' ? 'Cash' : 'Bank Transfer',
+      customerName: json['customer_name']?.toString(),
+      description: json['note']?.toString(),
+      createdById: user.id,
+      createdBy: user,
+      orderedProducts: items,
+      receivedAmount: double.tryParse(json['paid_amount']?.toString() ?? '')?.toInt() ?? 0,
+      returnAmount: double.tryParse(json['debt_amount']?.toString() ?? '')?.toInt() ?? 0,
+      totalAmount: double.tryParse(json['total_amount']?.toString() ?? '')?.toInt() ?? 0,
+      totalOrderedProduct: items.length,
+      createdAt: json['created_at']?.toString(),
+      updatedAt: json['updated_at']?.toString(),
+    );
+  }
+
+  /// Chuyển đổi sang định dạng JSON phù hợp với NextJS ERP Backend
+  Map<String, dynamic> toBackendJson(String branchId, String employeeId) {
+    final items = orderedProducts?.map((e) => e.toBackendJson(id.toString(), branchId)).toList() ?? [];
+
+    return {
+      'order_no': 'ORD-$id',
+      'status': 'completed',
+      'customer_id': '', // let server auto-generate/resolve
+      'customer_name': customerName ?? 'Khách lẻ',
+      'branch_id': branchId,
+      'employee_id': employeeId,
+      'channel': 'pos',
+      'subtotal': totalAmount.toString(),
+      'discount_amount': '0',
+      'shipping_fee': '0',
+      'tax_amount': '0',
+      'total_amount': totalAmount.toString(),
+      'paid_amount': receivedAmount.toString(),
+      'debt_amount': (totalAmount - receivedAmount).clamp(0, 999999999).toString(),
+      'is_return': 'FALSE',
+      'payment_method': paymentMethod == 'Cash' ? 'cash' : 'bank_transfer',
+      'note': description ?? '',
+      'items': items,
+    };
+  }
 }

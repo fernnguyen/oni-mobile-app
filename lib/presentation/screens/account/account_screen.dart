@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../app/di/app_providers.dart';
 import '../../../core/themes/app_sizes.dart';
 import '../../providers/auth/auth_notifier.dart';
 import '../../providers/main/main_notifier.dart';
@@ -28,6 +29,7 @@ class AccountScreen extends StatelessWidget {
             _PrinterSettingsButton(),
             _AboutButton(),
             _SignOutButton(),
+            _DeleteAccountButton(),
           ],
         ),
       ),
@@ -313,10 +315,14 @@ class _SignOutButton extends ConsumerWidget {
             onTapRightButton: (context) async {
               context.pop();
 
-              final isSyncronizing = ref.read(mainNotifierProvider).isSyncronizing;
+              final isSyncronizing = ref
+                  .read(mainNotifierProvider)
+                  .isSyncronizing;
 
               if (isSyncronizing) {
-                AppSnackBar.showError('Cannot sign out while synchronizing data is in progress. Please wait a moment.');
+                AppSnackBar.showError(
+                  'Cannot sign out while synchronizing data is in progress. Please wait a moment.',
+                );
                 return;
               }
 
@@ -327,6 +333,87 @@ class _SignOutButton extends ConsumerWidget {
               if (res.isSuccess) {
                 if (!context.mounted) return;
                 context.go('/sign-in');
+              } else {
+                AppSnackBar.showError(res.error.toString());
+              }
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _DeleteAccountButton extends ConsumerWidget {
+  const _DeleteAccountButton();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSizes.padding),
+      child: AppButton(
+        buttonColor: theme.colorScheme.surface,
+        borderColor: theme.colorScheme.errorContainer,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.delete_forever_rounded,
+                  size: 18,
+                  color: theme.colorScheme.error,
+                ),
+                const SizedBox(width: AppSizes.padding / 1.5),
+                Text(
+                  'Delete Account',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.error,
+                  ),
+                ),
+              ],
+            ),
+            Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 18,
+              color: theme.colorScheme.error,
+            ),
+          ],
+        ),
+        onTap: () {
+          AppDialog.show(
+            title: 'Delete Account',
+            text:
+                'Are you sure you want to permanently delete your account? This action cannot be undone and all your local and remote POS data will be deleted.',
+            leftButtonText: 'Cancel',
+            rightButtonText: 'Delete',
+            onTapRightButton: (context) async {
+              context.pop();
+
+              final isSyncronizing = ref
+                  .read(mainNotifierProvider)
+                  .isSyncronizing;
+
+              if (isSyncronizing) {
+                AppSnackBar.showError(
+                  'Cannot delete account while synchronization is in progress. Please wait.',
+                );
+                return;
+              }
+
+              final user = ref.read(mainNotifierProvider).user;
+              if (user == null) return;
+
+              final res = await AppDialog.showProgress(() async {
+                return ref.read(userRepositoryProvider).deleteUser(user.id);
+              });
+
+              if (res.isSuccess) {
+                if (!context.mounted) return;
+                context.go('/sign-in');
+                AppSnackBar.show('Your account has been deleted.');
               } else {
                 AppSnackBar.showError(res.error.toString());
               }

@@ -84,4 +84,34 @@ class ProductModel {
       updatedAt: updatedAt,
     );
   }
+
+  /// Khởi tạo ProductModel từ định dạng JSON của Backend NextJS ERP
+  factory ProductModel.fromBackendJson(Map<String, dynamic> json, String userId) {
+    return ProductModel(
+      id: int.tryParse(json['id']?.toString() ?? '') ?? json['id'].hashCode,
+      createdById: userId,
+      name: json['name']?.toString() ?? '',
+      imageUrl: json['image_url']?.toString() ?? '',
+      stock: int.tryParse(json['stock_qty']?.toString() ?? '') ?? 0,
+      sold: int.tryParse(json['sold']?.toString() ?? '') ?? 0,
+      price: double.tryParse(json['sell_price']?.toString() ?? '')?.toInt() ?? 0,
+      description: json['description']?.toString(),
+      createdAt: json['created_at']?.toString(),
+      updatedAt: json['updated_at']?.toString(),
+    );
+  }
+
+  /// Chuyển đổi sang định dạng JSON phù hợp với NextJS ERP Backend
+  Map<String, dynamic> toBackendJson() {
+    return {
+      'id': id.toString(),
+      'name': name,
+      'image_url': imageUrl,
+      'stock_qty': stock.toString(),
+      'sell_price': price.toString(),
+      'description': description ?? '',
+      'active': 'TRUE',
+      'product_type': 'simple',
+    };
+  }
 }
