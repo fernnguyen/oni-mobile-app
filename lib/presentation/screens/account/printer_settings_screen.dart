@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:unified_esc_pos_printer/unified_esc_pos_printer.dart';
 
 import '../../../app/di/app_providers.dart';
+import '../../../core/locale/app_localizations.dart';
 import '../../../core/themes/app_sizes.dart';
 import '../../providers/account/printer_settings_notifier.dart';
+import '../../providers/locale/locale_notifier.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_drop_down.dart';
 import '../../widgets/app_icon_button.dart';
@@ -30,7 +32,7 @@ class _PrinterSettingsScreenState extends ConsumerState<PrinterSettingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Printer Settings'),
+        title: Text(context.loc.printerSettings),
         titleSpacing: 0,
       ),
       body: const _PrinterSettingsBody(),
@@ -88,7 +90,7 @@ class _PaperSizeSelector extends ConsumerWidget {
     final isBusy = isScanning || isConnecting || isDisconnecting;
 
     return AppDropDown<PaperSize>(
-      labelText: 'Paper Size',
+      labelText: context.loc.paperSize,
       selectedValue: paperSize,
       enabled: !isBusy,
       dropdownItems: PaperSize.values.map((size) {
@@ -122,12 +124,13 @@ class _ConnectionTypeDropDown extends ConsumerWidget {
     final isScanning = ref.watch(printerSettingsNotifierProvider.select((p) => p.isScanning));
     final isConnecting = ref.watch(printerSettingsNotifierProvider.select((s) => s.connectingDeviceId != null));
     final isDisconnecting = ref.watch(printerSettingsNotifierProvider.select((p) => p.isDisconnecting));
+    final isVietnamese = ref.watch(localeNotifierProvider).languageCode == 'vi';
 
     final isBusy = isScanning || isConnecting || isDisconnecting;
 
     return AppDropDown<PrinterConnectionType>.multi(
-      labelText: 'Connection Types',
-      hintText: 'Select connection types',
+      labelText: isVietnamese ? 'Cổng kết nối' : 'Connection Types',
+      hintText: isVietnamese ? 'Chọn cổng kết nối' : 'Select connection types',
       enabled: !isBusy,
       selectedValues: selectedTypes,
       dropdownItems: PrinterConnectionType.values.map((type) {
@@ -142,7 +145,7 @@ class _ConnectionTypeDropDown extends ConsumerWidget {
           ),
         );
       }).toList(),
-      selectedValuesTextBuilder: _selectedLabel,
+      selectedValuesTextBuilder: (val) => _selectedLabel(val, isVietnamese),
       onChanged: (type) {
         if (type == null) return;
         ref.read(printerSettingsNotifierProvider.notifier).toggleConnectionType(type);
@@ -168,9 +171,9 @@ class _ConnectionTypeDropDown extends ConsumerWidget {
     };
   }
 
-  String _selectedLabel(Set<PrinterConnectionType> selectedTypes) {
+  String _selectedLabel(Set<PrinterConnectionType> selectedTypes, bool isVietnamese) {
     if (selectedTypes.length == PrinterConnectionType.values.length) {
-      return 'All connection types';
+      return isVietnamese ? 'Tất cả cổng kết nối' : 'All connection types';
     }
 
     return selectedTypes.map(_label).join(', ');
@@ -186,6 +189,7 @@ class _DevicesHeader extends ConsumerWidget {
     final isConnecting = ref.watch(printerSettingsNotifierProvider.select((s) => s.connectingDeviceId != null));
     final isDisconnecting = ref.watch(printerSettingsNotifierProvider.select((p) => p.isDisconnecting));
     final hasSelectedPrinter = ref.read(printerSettingsNotifierProvider.notifier).selectedPrinterIndex != -1;
+    final isVietnamese = ref.watch(localeNotifierProvider).languageCode == 'vi';
 
     final isBusy = isScanning || isConnecting || isDisconnecting;
 
@@ -195,7 +199,7 @@ class _DevicesHeader extends ConsumerWidget {
         Row(
           children: [
             Text(
-              'Available Devices',
+              isVietnamese ? 'Thiết bị khả dụng' : 'Available Devices',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(width: AppSizes.padding / 1.5),
@@ -257,13 +261,16 @@ class _PrinterList extends ConsumerWidget {
     final isScanning = ref.watch(printerSettingsNotifierProvider.select((s) => s.isScanning));
     final isConnecting = ref.watch(printerSettingsNotifierProvider.select((s) => s.connectingDeviceId != null));
     final selectedPrinterIndex = notifier.selectedPrinterIndex;
+    final isVietnamese = ref.watch(localeNotifierProvider).languageCode == 'vi';
 
     if (printers.isEmpty) {
       return Padding(
         padding: const EdgeInsets.all(AppSizes.padding * 2),
         child: Center(
           child: Text(
-            isScanning ? 'Scanning for printers...' : '(No printer detected)',
+            isScanning 
+                ? (isVietnamese ? 'Đang tìm kiếm máy in...' : 'Scanning for printers...') 
+                : (isVietnamese ? '(Không tìm thấy máy in)' : '(No printer detected)'),
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.bold,
               color: Theme.of(context).colorScheme.outline,

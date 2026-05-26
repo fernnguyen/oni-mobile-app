@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/locale/app_locale.dart';
+import '../presentation/providers/locale/locale_notifier.dart';
 import '../presentation/providers/theme/theme_notifier.dart';
 import 'di/app_providers.dart';
 import 'error/error_handler_builder.dart';
@@ -14,6 +15,7 @@ class App extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = ref.watch(themeNotifierProvider.select((s) => s.themeData));
     final router = ref.watch(appRoutesProvider).router;
+    final locale = ref.watch(localeNotifierProvider);
 
     return MaterialApp.router(
       title: 'Flutter POS',
@@ -21,10 +23,11 @@ class App extends ConsumerWidget {
       themeMode: ThemeMode.light,
       debugShowCheckedModeBanner: kDebugMode,
       routerConfig: router,
-      locale: AppLocale.defaultLocale,
+      locale: locale,
       supportedLocales: AppLocale.supportedLocales,
       localizationsDelegates: AppLocale.localizationsDelegates,
       builder: (context, child) => ErrorHandlerBuilder(child: child),
     );
   }
 }
+

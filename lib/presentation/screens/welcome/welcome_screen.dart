@@ -2,6 +2,7 @@ import 'package:app_image/app_image.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/assets/assets.dart';
+import '../../../core/locale/app_localizations.dart';
 import '../../../core/themes/app_sizes.dart';
 
 class WelcomeScreen extends StatefulWidget {
@@ -32,11 +33,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
           ),
           const SizedBox(height: AppSizes.padding),
           Text(
-            'Welcome!',
+            context.loc.welcomeTitle,
             style: Theme.of(context).textTheme.displaySmall?.copyWith(fontWeight: FontWeight.bold),
           ),
           Text(
-            'Welcome to Flutter POS app',
+            context.loc.welcomeSubtitle,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyLarge,
           ),

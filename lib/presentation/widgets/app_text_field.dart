@@ -215,7 +215,7 @@ class _AppTextFieldState extends State<AppTextField> {
       return widget.prefixWidget!;
     }
 
-    if (widget.type == AppTextFieldType.currency) {
+    if (widget.type == AppTextFieldType.currency && AppLocale.defaultCurrencyCode != 'đ') {
       return Padding(
         padding: const EdgeInsets.all(16),
         child: Text(
@@ -242,6 +242,20 @@ class _AppTextFieldState extends State<AppTextField> {
   Widget? suffix(BuildContext context) {
     if (widget.suffixWidget != null) {
       return widget.suffixWidget!;
+    }
+
+    if (widget.type == AppTextFieldType.currency && AppLocale.defaultCurrencyCode == 'đ') {
+      return Padding(
+        padding: const EdgeInsets.all(16),
+        child: Text(
+          AppLocale.defaultCurrencyCode,
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+        ),
+      );
     }
 
     if (widget.type == AppTextFieldType.search) {

@@ -9,6 +9,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../core/themes/app_sizes.dart';
 import '../../providers/account/account_notifier.dart';
+import '../../providers/locale/locale_notifier.dart';
 import '../../providers/main/main_notifier.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_dialog.dart';
@@ -51,6 +52,7 @@ class _ProfileFormScreenState extends ConsumerState<ProfileFormScreen> {
   }
 
   void onTapImage() async {
+    final isVietnamese = ref.read(localeNotifierProvider).languageCode == 'vi';
     final pickedFile = await ImagePicker().pickImage(
       source: ImageSource.gallery,
       imageQuality: 50,
@@ -62,8 +64,8 @@ class _ProfileFormScreenState extends ConsumerState<ProfileFormScreen> {
       sourcePath: pickedFile.path,
       aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
       uiSettings: [
-        AndroidUiSettings(toolbarTitle: 'Crop Photo'),
-        IOSUiSettings(title: 'Crop Photo'),
+        AndroidUiSettings(toolbarTitle: isVietnamese ? 'Cắt ảnh' : 'Crop Photo'),
+        IOSUiSettings(title: isVietnamese ? 'Cắt ảnh' : 'Crop Photo'),
       ],
     );
 
@@ -74,6 +76,7 @@ class _ProfileFormScreenState extends ConsumerState<ProfileFormScreen> {
   }
 
   void updatedUser() async {
+    final isVietnamese = ref.read(localeNotifierProvider).languageCode == 'vi';
     var res = await AppDialog.showProgress(() {
       return ref.read(accountNotifierProvider.notifier).updatedUser();
     });
@@ -81,7 +84,7 @@ class _ProfileFormScreenState extends ConsumerState<ProfileFormScreen> {
     if (res.isSuccess) {
       if (!mounted) return;
       Navigator.of(context).pop();
-      AppSnackBar.show('Profile updated');
+      AppSnackBar.show(isVietnamese ? 'Đã cập nhật thông tin cá nhân' : 'Profile updated');
 
       // Refresh user data
       ref.read(mainNotifierProvider.notifier).getAndSyncAllUserData();
@@ -95,10 +98,11 @@ class _ProfileFormScreenState extends ConsumerState<ProfileFormScreen> {
     final account = ref.read(accountNotifierProvider.notifier);
 
     final isLoaded = ref.watch(accountNotifierProvider.select((s) => s.isLoaded));
+    final isVietnamese = ref.watch(localeNotifierProvider).languageCode == 'vi';
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Edit Profile'),
+        title: Text(isVietnamese ? 'Chỉnh sửa trang cá nhân' : 'Edit Profile'),
         titleSpacing: 0,
       ),
       body: !isLoaded
@@ -129,12 +133,13 @@ class _ImageSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final imageFile = ref.watch(accountNotifierProvider.select((s) => s.imageFile));
     final imageUrl = ref.watch(accountNotifierProvider.select((s) => s.imageUrl));
+    final isVietnamese = ref.watch(localeNotifierProvider).languageCode == 'vi';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Profile Image',
+          isVietnamese ? 'Ảnh đại diện' : 'Profile Image',
           style: Theme.of(context).textTheme.labelLarge?.copyWith(
             fontWeight: FontWeight.bold,
           ),
@@ -180,7 +185,7 @@ class _ImageSection extends ConsumerWidget {
   }
 }
 
-class _NameField extends StatelessWidget {
+class _NameField extends ConsumerWidget {
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
 
@@ -190,20 +195,21 @@ class _NameField extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isVietnamese = ref.watch(localeNotifierProvider).languageCode == 'vi';
     return Padding(
       padding: const EdgeInsets.only(top: AppSizes.padding),
       child: AppTextField(
         controller: controller,
-        labelText: 'Name',
-        hintText: 'Your name...',
+        labelText: isVietnamese ? 'Tên hiển thị' : 'Name',
+        hintText: isVietnamese ? 'Nhập tên của bạn...' : 'Your name...',
         onChanged: onChanged,
       ),
     );
   }
 }
 
-class _EmailField extends StatelessWidget {
+class _EmailField extends ConsumerWidget {
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
 
@@ -213,20 +219,21 @@ class _EmailField extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isVietnamese = ref.watch(localeNotifierProvider).languageCode == 'vi';
     return Padding(
       padding: const EdgeInsets.only(top: AppSizes.padding),
       child: AppTextField(
         controller: controller,
         labelText: 'Email',
-        hintText: 'Your email...',
+        hintText: isVietnamese ? 'Nhập email...' : 'Your email...',
         onChanged: onChanged,
       ),
     );
   }
 }
 
-class _PhoneField extends StatelessWidget {
+class _PhoneField extends ConsumerWidget {
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
 
@@ -236,13 +243,14 @@ class _PhoneField extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isVietnamese = ref.watch(localeNotifierProvider).languageCode == 'vi';
     return Padding(
       padding: const EdgeInsets.only(top: AppSizes.padding),
       child: AppTextField(
         controller: controller,
-        labelText: 'Phone Number',
-        hintText: 'Your phone number...',
+        labelText: isVietnamese ? 'Số điện thoại' : 'Phone Number',
+        hintText: isVietnamese ? 'Nhập số điện thoại...' : 'Your phone number...',
         keyboardType: TextInputType.number,
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
         onChanged: onChanged,
@@ -251,20 +259,21 @@ class _PhoneField extends StatelessWidget {
   }
 }
 
-class _UpdateButton extends StatelessWidget {
+class _UpdateButton extends ConsumerWidget {
   final VoidCallback onTap;
 
   const _UpdateButton({required this.onTap});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isVietnamese = ref.watch(localeNotifierProvider).languageCode == 'vi';
     return Padding(
       padding: const EdgeInsets.only(
         top: AppSizes.padding * 1.5,
         bottom: AppSizes.padding * 2,
       ),
       child: AppButton(
-        text: 'Update',
+        text: isVietnamese ? 'Cập nhật' : 'Update',
         onTap: onTap,
       ),
     );

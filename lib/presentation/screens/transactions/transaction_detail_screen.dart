@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/di/app_providers.dart';
-import '../../../core/extensions/string_casing_extension.dart';
+import '../../../core/locale/app_localizations.dart';
 import '../../../core/themes/app_colors.dart';
 import '../../../core/themes/app_sizes.dart';
 import '../../../core/utilities/currency_formatter.dart';
 import '../../../core/utilities/date_time_formatter.dart';
 import '../../../domain/entities/ordered_product_entity.dart';
 import '../../../domain/entities/transaction_entity.dart';
+import '../../providers/locale/locale_notifier.dart';
 import '../../providers/transactions/transaction_detail_notifier.dart';
 import '../../widgets/app_empty_state.dart';
 import '../../widgets/app_progress_indicator.dart';
@@ -32,13 +33,16 @@ class TransactionDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isVietnamese = ref.watch(localeNotifierProvider).languageCode == 'vi';
+
     return Scaffold(
       appBar: AppBar(
+        title: Text(isVietnamese ? 'Chi tiết đơn hàng' : 'Order Details'),
         elevation: 0,
         actions: [
           IconButton(
             icon: const Icon(Icons.print_outlined),
-            tooltip: 'Reprint',
+            tooltip: isVietnamese ? 'In lại hóa đơn' : 'Reprint',
             onPressed: () => _reprint(ref),
           ),
         ],
@@ -55,7 +59,7 @@ class TransactionDetailScreen extends ConsumerWidget {
           }
 
           if (snapshot.data == null) {
-            return const AppEmptyState(title: 'Not Found');
+            return AppEmptyState(title: isVietnamese ? 'Không tìm thấy' : 'Not Found');
           }
 
           final transaction = snapshot.data!;
@@ -79,11 +83,13 @@ class TransactionDetailScreen extends ConsumerWidget {
   }
 }
 
-class _StatusSection extends StatelessWidget {
+class _StatusSection extends ConsumerWidget {
   const _StatusSection();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isVietnamese = ref.watch(localeNotifierProvider).languageCode == 'vi';
+
     return Column(
       children: [
         const Icon(
@@ -93,7 +99,7 @@ class _StatusSection extends StatelessWidget {
         ),
         const SizedBox(height: AppSizes.padding / 2),
         Text(
-          'Transaction Created',
+          isVietnamese ? 'Đã tạo đơn hàng thành công' : 'Transaction Created',
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.bold,
@@ -104,13 +110,16 @@ class _StatusSection extends StatelessWidget {
   }
 }
 
-class _TransactionDetail extends StatelessWidget {
+class _TransactionDetail extends ConsumerWidget {
   final TransactionEntity transaction;
 
   const _TransactionDetail({required this.transaction});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isVietnamese = ref.watch(localeNotifierProvider).languageCode == 'vi';
+    final isCash = transaction.paymentMethod == 'cash';
+
     return Container(
       padding: const EdgeInsets.all(AppSizes.padding),
       decoration: BoxDecoration(
@@ -124,7 +133,7 @@ class _TransactionDetail extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Transaction ID',
+                isVietnamese ? 'Mã đơn hàng' : 'Transaction ID',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -142,11 +151,13 @@ class _TransactionDetail extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Payment Method',
+                isVietnamese ? 'Phương thức' : 'Payment Method',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               Text(
-                transaction.paymentMethod.toTitleCase(),
+                isCash
+                    ? (isVietnamese ? 'Tiền mặt' : 'Cash')
+                    : (isVietnamese ? 'Chuyển khoản' : 'Bank Transfer'),
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
             ],
@@ -156,7 +167,7 @@ class _TransactionDetail extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Created By',
+                isVietnamese ? 'Người tạo' : 'Created By',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               Text(
@@ -170,7 +181,7 @@ class _TransactionDetail extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Created At',
+                isVietnamese ? 'Thời gian' : 'Created At',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               Text(
@@ -184,11 +195,11 @@ class _TransactionDetail extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Customer Name',
+                isVietnamese ? 'Khách hàng' : 'Customer Name',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               Text(
-                transaction.customerName ?? '-',
+                transaction.customerName ?? (isVietnamese ? 'Khách lẻ' : 'General Guest'),
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
             ],
@@ -198,7 +209,7 @@ class _TransactionDetail extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Description',
+                isVietnamese ? 'Mô tả' : 'Description',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               Text(
@@ -213,13 +224,15 @@ class _TransactionDetail extends StatelessWidget {
   }
 }
 
-class _PaymentDetail extends StatelessWidget {
+class _PaymentDetail extends ConsumerWidget {
   final TransactionEntity transaction;
 
   const _PaymentDetail({required this.transaction});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isVietnamese = ref.watch(localeNotifierProvider).languageCode == 'vi';
+
     return Container(
       padding: const EdgeInsets.all(AppSizes.padding),
       decoration: BoxDecoration(
@@ -233,7 +246,7 @@ class _PaymentDetail extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Ordered Products',
+                isVietnamese ? 'Danh sách sản phẩm' : 'Ordered Products',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -258,7 +271,7 @@ class _PaymentDetail extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Total',
+                context.loc.total,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -276,7 +289,7 @@ class _PaymentDetail extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Payment Received',
+                context.loc.paidAmount,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               Text(
@@ -290,7 +303,7 @@ class _PaymentDetail extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Change',
+                context.loc.changeLabel,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               Text(

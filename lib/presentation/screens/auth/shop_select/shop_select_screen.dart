@@ -3,9 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/di/app_providers.dart';
 import '../../../../core/constants/constants.dart';
+import '../../../../core/locale/app_localizations.dart';
 import '../../../../core/themes/app_colors.dart';
 import '../../../../core/themes/app_sizes.dart';
 import '../../../providers/auth/auth_notifier.dart';
+import '../../../providers/locale/locale_notifier.dart';
 import '../../../widgets/app_button.dart';
 import '../../../widgets/app_dialog.dart';
 import '../../../widgets/brand_logo.dart';
@@ -58,12 +60,15 @@ class _ShopSelectScreenState extends ConsumerState<ShopSelectScreen> {
         _errorMessage = null;
       });
 
+      final isVietnamese = ref.read(localeNotifierProvider).languageCode == 'vi';
       final sharedPreferences = ref.read(sharedPreferencesProvider);
       final savedSubdomain = sharedPreferences.getString(Constants.selectedSubdomainKey) ?? '';
 
       if (savedSubdomain.isEmpty) {
         setState(() {
-          _errorMessage = 'Không tìm thấy thông tin subdomain doanh nghiệp. Vui lòng đăng nhập lại.';
+          _errorMessage = isVietnamese 
+              ? 'Không tìm thấy thông tin subdomain doanh nghiệp. Vui lòng đăng nhập lại.'
+              : 'Business subdomain information not found. Please log in again.';
           _isLoading = false;
         });
         return;
@@ -74,7 +79,9 @@ class _ShopSelectScreenState extends ConsumerState<ShopSelectScreen> {
 
       if (userId == null) {
         setState(() {
-          _errorMessage = 'Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.';
+          _errorMessage = isVietnamese
+              ? 'Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.'
+              : 'Invalid session. Please log in again.';
           _isLoading = false;
         });
         return;
@@ -89,7 +96,9 @@ class _ShopSelectScreenState extends ConsumerState<ShopSelectScreen> {
 
       if (tenantRes == null) {
         setState(() {
-          _errorMessage = 'Không tìm thấy doanh nghiệp với subdomain "$savedSubdomain". Vui lòng kiểm tra lại.';
+          _errorMessage = isVietnamese
+              ? 'Không tìm thấy doanh nghiệp với subdomain "$savedSubdomain". Vui lòng kiểm tra lại.'
+              : 'No business found with subdomain "$savedSubdomain". Please check again.';
           _isLoading = false;
         });
         return;
@@ -139,8 +148,11 @@ class _ShopSelectScreenState extends ConsumerState<ShopSelectScreen> {
         _isLoading = false;
       });
     } catch (e) {
+      final isVietnamese = ref.read(localeNotifierProvider).languageCode == 'vi';
       setState(() {
-        _errorMessage = 'Không tải được danh sách cửa hàng: $e';
+        _errorMessage = isVietnamese 
+            ? 'Không tải được danh sách cửa hàng: $e'
+            : 'Failed to load shop list: $e';
         _isLoading = false;
       });
     }
@@ -162,7 +174,12 @@ class _ShopSelectScreenState extends ConsumerState<ShopSelectScreen> {
         ref.read(appRoutesProvider).router.refresh();
       }
     } catch (e) {
-      AppDialog.showError(error: 'Lỗi khi lưu thông tin cửa hàng: $e');
+      final isVietnamese = ref.read(localeNotifierProvider).languageCode == 'vi';
+      AppDialog.showError(
+        error: isVietnamese 
+            ? 'Lỗi khi lưu thông tin cửa hàng: $e'
+            : 'Error while saving store info: $e',
+      );
     }
   }
 
@@ -178,7 +195,7 @@ class _ShopSelectScreenState extends ConsumerState<ShopSelectScreen> {
     } else {
       if (mounted) {
         AppDialog.showError(
-          error: res.error?.toString() ?? 'Đăng xuất thất bại.',
+          error: res.error?.toString() ?? context.loc.signInFailed,
         );
       }
     }
@@ -190,12 +207,12 @@ class _ShopSelectScreenState extends ConsumerState<ShopSelectScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Chọn Chi Nhánh'),
+        title: Text(context.loc.selectShopTitle),
         centerTitle: true,
         actions: [
           IconButton(
             icon: const Icon(Icons.logout_rounded, color: Colors.grey),
-            tooltip: 'Đăng xuất',
+            tooltip: context.loc.signOut,
             onPressed: _handleLogout,
           ),
         ],
@@ -213,7 +230,7 @@ class _ShopSelectScreenState extends ConsumerState<ShopSelectScreen> {
               ),
               const SizedBox(height: AppSizes.padding * 1.5),
               Text(
-                'Vui lòng chọn chi nhánh làm việc bên dưới để bắt đầu ca bán hàng:',
+                context.loc.selectShopSubtitle,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                   fontWeight: FontWeight.w500,
@@ -231,6 +248,8 @@ class _ShopSelectScreenState extends ConsumerState<ShopSelectScreen> {
   }
 
   Widget _buildBody(ThemeData theme) {
+    final isVietnamese = ref.watch(localeNotifierProvider).languageCode == 'vi';
+
     if (_isLoading) {
       return const Center(
         child: CircularProgressIndicator(
@@ -279,7 +298,7 @@ class _ShopSelectScreenState extends ConsumerState<ShopSelectScreen> {
                   ),
                 ),
                 icon: const Icon(Icons.refresh_rounded),
-                label: const Text('Thử lại'),
+                label: Text(isVietnamese ? 'Thử lại' : 'Retry'),
               ),
             ],
           ),
@@ -308,14 +327,16 @@ class _ShopSelectScreenState extends ConsumerState<ShopSelectScreen> {
               ),
               const SizedBox(height: 20),
               Text(
-                'Chưa được phân quyền chi nhánh',
+                isVietnamese ? 'Chưa được phân quyền chi nhánh' : 'No Authorized Branch',
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
-                'Tài khoản của bạn chưa được cấp quyền truy cập chi nhánh nào thuộc doanh nghiệp này.',
+                isVietnamese 
+                    ? 'Tài khoản của bạn chưa được cấp quyền truy cập chi nhánh nào thuộc doanh nghiệp này.'
+                    : 'Your account has not been authorized to access any branch under this business.',
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: Colors.grey[600],
@@ -323,7 +344,7 @@ class _ShopSelectScreenState extends ConsumerState<ShopSelectScreen> {
               ),
               const SizedBox(height: AppSizes.padding * 1.5),
               AppButton(
-                text: 'ĐĂNG XUẤT TÀI KHOẢN',
+                text: isVietnamese ? 'ĐĂNG XUẤT TÀI KHOẢN' : 'SIGN OUT ACCOUNT',
                 onTap: _handleLogout,
               ),
             ],

@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/locale/app_localizations.dart';
 import '../../../core/themes/app_sizes.dart';
 import '../../../domain/entities/product_entity.dart';
+import '../../providers/locale/locale_notifier.dart';
 import '../../providers/products/products_notifier.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_empty_state.dart';
@@ -58,10 +60,11 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
   Widget build(BuildContext context) {
     final allProducts = ref.watch(productsNotifierProvider.select((s) => s.allProducts));
     final isLoadingMore = ref.watch(productsNotifierProvider.select((s) => s.isLoadingMore));
+    final isVietnamese = ref.watch(localeNotifierProvider).languageCode == 'vi';
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Products'),
+        title: Text(context.loc.navProducts),
         elevation: 0,
         shadowColor: Colors.transparent,
         actions: const [_AddButton()],
@@ -102,8 +105,8 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                       hasScrollBody: false,
                       fillOverscroll: true,
                       child: AppEmptyState(
-                        subtitle: 'No products available, add product to continue',
-                        buttonText: 'Add Product',
+                        subtitle: isVietnamese ? 'Không có sản phẩm nào khả dụng, thêm sản phẩm để tiếp tục' : 'No products available, add product to continue',
+                        buttonText: context.loc.createProduct,
                         onTapButton: () => context.push('/products/product-create'),
                       ),
                     );
@@ -158,7 +161,7 @@ class _AddButton extends StatelessWidget {
             ),
             const SizedBox(width: AppSizes.padding / 4),
             Text(
-              'Add Product',
+              context.loc.createProduct,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
                 fontSize: 10,
                 fontWeight: FontWeight.bold,
@@ -182,7 +185,7 @@ class _SearchField extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return AppTextField(
       controller: controller,
-      hintText: 'Search Products...',
+      hintText: context.loc.searchProductsHint,
       type: AppTextFieldType.search,
       textInputAction: TextInputAction.search,
       onEditingComplete: () {

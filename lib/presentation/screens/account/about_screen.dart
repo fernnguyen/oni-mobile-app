@@ -1,19 +1,22 @@
 import 'package:app_image/app_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../../core/assets/assets.dart';
+import '../../../core/locale/app_localizations.dart';
 import '../../../core/themes/app_sizes.dart';
 import '../../../core/utilities/external_launcher.dart';
+import '../../providers/locale/locale_notifier.dart';
 
-class AboutScreen extends StatefulWidget {
+class AboutScreen extends ConsumerStatefulWidget {
   const AboutScreen({super.key});
 
   @override
-  State<AboutScreen> createState() => _AboutScreenState();
+  ConsumerState<AboutScreen> createState() => _AboutScreenState();
 }
 
-class _AboutScreenState extends State<AboutScreen> {
+class _AboutScreenState extends ConsumerState<AboutScreen> {
   String appName = '';
   String packageName = '';
   String version = '';
@@ -36,9 +39,11 @@ class _AboutScreenState extends State<AboutScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isVietnamese = ref.watch(localeNotifierProvider).languageCode == 'vi';
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('About'),
+        title: Text(context.loc.aboutLabel),
         titleSpacing: 0,
       ),
       body: Center(
@@ -54,7 +59,7 @@ class _AboutScreenState extends State<AboutScreen> {
               ),
               const SizedBox(height: AppSizes.padding),
               Text(
-                'Flutter POS',
+                'ONI Mobile POS',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
               Text(
@@ -66,39 +71,32 @@ class _AboutScreenState extends State<AboutScreen> {
                 ),
               ),
               Text(
-                'version $version',
+                isVietnamese ? 'Phiên bản $version' : 'Version $version',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: Theme.of(context).colorScheme.outline,
                 ),
               ),
-              const SizedBox(height: AppSizes.padding),
+              const SizedBox(height: AppSizes.padding * 1.5),
               Text(
-                'A Point of Sale (POS) application built with Flutter, demonstrating Clean Architecture principles and offline-first design patterns.',
+                context.loc.aboutDescription,
                 textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodySmall,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.4),
               ),
               const SizedBox(height: AppSizes.padding * 2),
-              Text(
-                "This project serves as a learning resource and reference implementation for building Flutter apps with proper architecture and automatic data synchronization between local storage (SQLite) and cloud database (Firestore).\n\nThe app prioritizes local-first operations, storing all data in SQLite and automatically syncing with Firestore when online. When offline, all user actions (create, update, delete) are recorded as QueuedActions in the local database and automatically executed in sequence when internet connectivity is restored.",
-                textAlign: TextAlign.justify,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-              const SizedBox(height: AppSizes.padding),
               Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    "Developed with ❤️ by",
-                    textAlign: TextAlign.justify,
+                    isVietnamese ? "Phát triển bởi " : "Developed by ",
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.outline,
                     ),
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    "Elriz Wiraswara",
-                    textAlign: TextAlign.justify,
+                    "ONI ERP Team",
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -106,60 +104,28 @@ class _AboutScreenState extends State<AboutScreen> {
                 ],
               ),
               const SizedBox(height: AppSizes.padding / 2),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: GestureDetector(
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        "GitHub",
-                        textAlign: TextAlign.justify,
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Icon(
-                        Icons.open_in_new,
-                        size: 12,
+              GestureDetector(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      "Website",
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
                         color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.bold,
                       ),
-                    ],
-                  ),
-                  onTap: () {
-                    ExternalLauncher.openUrl('https://github.com/elrizwiraswara');
-                  },
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(
+                      Icons.open_in_new,
+                      size: 12,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(height: AppSizes.padding / 4),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: GestureDetector(
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        "Website",
-                        textAlign: TextAlign.justify,
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Icon(
-                        Icons.open_in_new,
-                        size: 12,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    ],
-                  ),
-                  onTap: () {
-                    ExternalLauncher.openUrl('https://elriztechnology.com');
-                  },
-                ),
+                onTap: () {
+                  ExternalLauncher.openUrl('https://oni.vn');
+                },
               ),
             ],
           ),

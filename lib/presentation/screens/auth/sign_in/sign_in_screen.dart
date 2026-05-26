@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/di/app_providers.dart';
 import '../../../../core/constants/constants.dart';
+import '../../../../core/locale/app_localizations.dart';
 import '../../../../core/themes/app_colors.dart';
 import '../../../../core/themes/app_sizes.dart';
 import '../../../providers/auth/auth_notifier.dart';
@@ -66,7 +67,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
       }
     } else {
       if (mounted) {
-        AppDialog.showError(error: res.error?.toString() ?? 'Đăng nhập thất bại.');
+        AppDialog.showError(error: res.error?.toString() ?? context.loc.signInFailed);
       }
     }
   }
@@ -95,8 +96,8 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                   TextFormField(
                     controller: _subdomainController,
                     decoration: InputDecoration(
-                      labelText: 'Doanh nghiệp (Subdomain)',
-                      hintText: 'ten-doanh-nghiep',
+                      labelText: context.loc.subdomainLabel,
+                      hintText: context.loc.subdomainHint,
                       prefixIcon: const Icon(
                         Icons.domain_rounded,
                         color: AppColors.primary,
@@ -134,7 +135,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                     textInputAction: TextInputAction.next,
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
-                        return 'Vui lòng nhập tên subdomain doanh nghiệp';
+                        return context.loc.subdomainError;
                       }
                       return null;
                     },
@@ -145,8 +146,8 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                   TextFormField(
                     controller: _emailController,
                     decoration: InputDecoration(
-                      labelText: 'Tài khoản (Email)',
-                      hintText: 'email@example.com',
+                      labelText: context.loc.emailLabel,
+                      hintText: context.loc.emailHint,
                       prefixIcon: const Icon(
                         Icons.email_outlined,
                         color: AppColors.primary,
@@ -179,7 +180,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                     textInputAction: TextInputAction.next,
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
-                        return 'Vui lòng nhập email tài khoản';
+                        return context.loc.emailError;
                       }
                       return null;
                     },
@@ -191,7 +192,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                     controller: _passwordController,
                     obscureText: _obscurePassword,
                     decoration: InputDecoration(
-                      labelText: 'Mật khẩu',
+                      labelText: context.loc.passwordLabel,
                       prefixIcon: const Icon(
                         Icons.lock_outline_rounded,
                         color: AppColors.primary,
@@ -235,7 +236,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                     onFieldSubmitted: (_) => _handleSignIn(),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Vui lòng nhập mật khẩu';
+                        return context.loc.passwordError;
                       }
                       return null;
                     },
@@ -244,7 +245,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
 
                   // Submit Button
                   AppButton(
-                    text: 'ĐĂNG NHẬP HỆ THỐNG',
+                    text: context.loc.signInButton,
                     onTap: _handleSignIn,
                   ),
                   const SizedBox(height: AppSizes.padding),

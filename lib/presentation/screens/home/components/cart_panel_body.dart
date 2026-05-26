@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
+import '../../../../core/locale/app_localizations.dart';
 import '../../../../core/themes/app_sizes.dart';
 import '../../../../core/utilities/currency_formatter.dart';
 import '../../../providers/home/home_notifier.dart';
@@ -32,7 +33,7 @@ class CartPanelBody extends StatelessWidget {
 class _OrderList extends ConsumerStatefulWidget {
   final PanelController panelController;
 
-  const _OrderList({super.key, required this.panelController});
+  const _OrderList({required this.panelController});
 
   @override
   ConsumerState<_OrderList> createState() => _OrderListState();
@@ -54,9 +55,9 @@ class _OrderListState extends ConsumerState<_OrderList> {
     if (homeState.orderedProducts.isEmpty) {
       return SizedBox(
         height: AppSizes.screenHeight(context) - 272,
-        child: const AppEmptyState(
-          title: 'Empty',
-          subtitle: 'No products added to cart',
+        child: AppEmptyState(
+          title: context.loc.emptyCart,
+          subtitle: context.loc.emptyCartSubtitle,
         ),
       );
     }
@@ -116,7 +117,7 @@ class _OrderTotal extends ConsumerWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            'Total (${homeState.orderedProducts.length})',
+            '${context.loc.total} (${homeState.orderedProducts.length})',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.bold,
             ),

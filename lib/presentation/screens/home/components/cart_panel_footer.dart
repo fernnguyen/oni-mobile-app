@@ -4,9 +4,11 @@ import 'package:go_router/go_router.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
 import '../../../../app/di/app_providers.dart';
+import '../../../../core/locale/app_localizations.dart';
 import '../../../../core/themes/app_sizes.dart';
 import '../../../../core/utilities/currency_formatter.dart';
 import '../../../providers/home/home_notifier.dart';
+import '../../../providers/locale/locale_notifier.dart';
 import '../../../widgets/app_button.dart';
 import '../../../widgets/app_dialog.dart';
 import '../../../widgets/app_drop_down.dart';
@@ -57,7 +59,7 @@ class _BackButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return AppButton(
-      text: 'Back',
+      text: context.loc.cancel,
       buttonColor: Theme.of(context).colorScheme.surface,
       borderColor: Theme.of(context).colorScheme.primary,
       textColor: Theme.of(context).colorScheme.primary,
@@ -75,13 +77,16 @@ class _PayButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final homeState = ref.watch(homeNotifierProvider);
     final homeNotifier = ref.read(homeNotifierProvider.notifier);
+    final isVietnamese = ref.watch(localeNotifierProvider).languageCode == 'vi';
 
     return AppButton(
       text: !homeState.isPanelExpanded
           ? homeState.orderedProducts.isNotEmpty
-                ? "${homeState.orderedProducts.length} Products = ${CurrencyFormatter.format(homeNotifier.getTotalAmount())}"
-                : 'Transaction'
-          : 'Pay',
+                ? isVietnamese
+                    ? "${homeState.orderedProducts.length} sản phẩm = ${CurrencyFormatter.format(homeNotifier.getTotalAmount())}"
+                    : "${homeState.orderedProducts.length} Items = ${CurrencyFormatter.format(homeNotifier.getTotalAmount())}"
+                : context.loc.navSales
+          : context.loc.pay,
       enabled: homeState.orderedProducts.isNotEmpty,
       onTap: () {
         if (homeState.isPanelExpanded) {
@@ -136,6 +141,7 @@ class _AdditionalInfoDialogState extends ConsumerState<_AdditionalInfoDialog> {
   Widget build(BuildContext context) {
     final homeState = ref.watch(homeNotifierProvider);
     final homeNotifier = ref.read(homeNotifierProvider.notifier);
+    final isVietnamese = ref.watch(localeNotifierProvider).languageCode == 'vi';
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -144,24 +150,25 @@ class _AdditionalInfoDialogState extends ConsumerState<_AdditionalInfoDialog> {
           autofocus: true,
           keyboardType: TextInputType.number,
           controller: _amountController,
-          labelText: 'Received Amount',
-          hintText: 'Received amount...',
+          labelText: context.loc.paidAmount,
+          hintText: isVietnamese ? 'Số tiền nhận...' : 'Received amount...',
+          type: AppTextFieldType.currency,
           onChanged: (val) {
             homeNotifier.onChangedReceivedAmount(int.tryParse(val) ?? 0);
           },
         ),
         const SizedBox(height: AppSizes.padding),
         AppDropDown(
-          labelText: 'Payment Method',
+          labelText: isVietnamese ? 'Phương thức thanh toán' : 'Payment Method',
           selectedValue: homeState.selectedPaymentMethod,
-          dropdownItems: const [
+          dropdownItems: [
             DropdownMenuItem(
               value: 'bank',
-              child: Text('Bank'),
+              child: Text(isVietnamese ? 'Chuyển khoản' : 'Bank Transfer'),
             ),
             DropdownMenuItem(
               value: 'cash',
-              child: Text('Cash'),
+              child: Text(context.loc.cash),
             ),
           ],
           onChanged: (v) => homeNotifier.onChangedPaymentMethod(v),
@@ -169,15 +176,15 @@ class _AdditionalInfoDialogState extends ConsumerState<_AdditionalInfoDialog> {
         const SizedBox(height: AppSizes.padding),
         AppTextField(
           controller: _customerController,
-          labelText: 'Customer Name (Optional)',
-          hintText: 'e.g. Jhone Doe',
+          labelText: isVietnamese ? 'Tên khách hàng (Tùy chọn)' : 'Customer Name (Optional)',
+          hintText: 'e.g. John Doe',
           onChanged: (v) => homeNotifier.onChangedCustomerName(v),
         ),
         const SizedBox(height: AppSizes.padding),
         AppTextField(
           controller: _descriptionController,
-          labelText: 'Description (Optional)',
-          hintText: 'Description...',
+          labelText: isVietnamese ? 'Mô tả (Tùy chọn)' : 'Description (Optional)',
+          hintText: isVietnamese ? 'Mô tả đơn hàng...' : 'Description...',
           onChanged: (v) => homeNotifier.onChangedDescription(v),
         ),
         const SizedBox(height: AppSizes.padding * 1.5),
@@ -185,7 +192,7 @@ class _AdditionalInfoDialogState extends ConsumerState<_AdditionalInfoDialog> {
           children: [
             Expanded(
               child: AppButton(
-                text: 'Cancel',
+                text: context.loc.cancel,
                 buttonColor: Theme.of(context).colorScheme.surface,
                 borderColor: Theme.of(context).colorScheme.primary,
                 textColor: Theme.of(context).colorScheme.primary,
@@ -198,7 +205,7 @@ class _AdditionalInfoDialogState extends ConsumerState<_AdditionalInfoDialog> {
             Expanded(
               flex: 2,
               child: AppButton(
-                text: 'Pay',
+                text: context.loc.pay,
                 enabled: (int.tryParse(_amountController.text) ?? 0) >= homeNotifier.getTotalAmount(),
                 onTap: () {
                   final router = ref.read(appRoutesProvider).router;

@@ -4,8 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
+import '../../../core/locale/app_localizations.dart';
 import '../../../core/themes/app_sizes.dart';
 import '../../../domain/entities/product_entity.dart';
+import '../../providers/locale/locale_notifier.dart';
 import '../../providers/home/home_notifier.dart';
 import '../../providers/main/main_notifier.dart';
 import '../../providers/products/products_notifier.dart';
@@ -163,14 +165,15 @@ class _Body extends ConsumerWidget {
                   }
 
                   if (allProducts.isEmpty) {
+                    final isVietnamese = ref.watch(localeNotifierProvider).languageCode == 'vi';
                     return SliverFillRemaining(
                       hasScrollBody: false,
                       fillOverscroll: true,
                       child: Padding(
                         padding: const EdgeInsets.only(bottom: 140),
                         child: AppEmptyState(
-                          subtitle: 'No products available, add product to continue',
-                          buttonText: 'Add Product',
+                          subtitle: isVietnamese ? 'Không có sản phẩm nào khả dụng, thêm sản phẩm để tiếp tục' : 'No products available, add product to continue',
+                          buttonText: context.loc.createProduct,
                           onTapButton: () => context.push('/products/product-create'),
                         ),
                       ),
@@ -260,6 +263,7 @@ class _SyncButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isHasQueuedActions = ref.watch(mainNotifierProvider.select((p) => p.isHasQueuedActions));
     final isSyncronizing = ref.watch(mainNotifierProvider.select((p) => p.isSyncronizing));
+    final isVietnamese = ref.watch(localeNotifierProvider).languageCode == 'vi';
 
     return Padding(
       padding: const EdgeInsets.only(right: AppSizes.padding / 4),
@@ -286,10 +290,10 @@ class _SyncButton extends ConsumerWidget {
             const SizedBox(width: AppSizes.padding / 4),
             Text(
               isSyncronizing
-                  ? 'Syncronizing'
+                  ? (isVietnamese ? 'Đang đồng bộ' : 'Synchronizing')
                   : isHasQueuedActions
-                  ? 'Synced'
-                  : 'Pending',
+                  ? (isVietnamese ? 'Đã đồng bộ' : 'Synced')
+                  : (isVietnamese ? 'Chờ đồng bộ' : 'Pending'),
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
                 fontSize: 10,
                 fontWeight: FontWeight.bold,
@@ -330,7 +334,8 @@ class _NetworkInfo extends ConsumerWidget {
           color: isHasInternet ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.outline,
         ),
         onTap: () {
-          AppSnackBar.show(isHasInternet ? 'Online mode' : 'No internet connection, running in offline mode');
+          final isVietnamese = ref.read(localeNotifierProvider).languageCode == 'vi';
+          AppSnackBar.show(isHasInternet ? (isVietnamese ? 'Chế độ trực tuyến' : 'Online mode') : (isVietnamese ? 'Không có kết nối mạng, chạy ở chế độ ngoại tuyến' : 'No internet connection, running in offline mode'));
         },
       ),
     );
@@ -346,7 +351,7 @@ class _SearchField extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return AppTextField(
       controller: controller,
-      hintText: 'Search Products...',
+      hintText: context.loc.searchProductsHint,
       type: AppTextFieldType.search,
       textInputAction: TextInputAction.search,
       onEditingComplete: () {
@@ -376,8 +381,10 @@ class _ProductCard extends ConsumerWidget {
 
         int currentQty = homeState.orderedProducts.where((e) => e.productId == product.id).firstOrNull?.quantity ?? 0;
 
+        final isVietnamese = ref.read(localeNotifierProvider).languageCode == 'vi';
+
         AppDialog.show(
-          title: 'Enter Amount',
+          title: isVietnamese ? 'Nhập số lượng' : 'Enter Quantity',
           child: OrderCard(
             name: product.name,
             imageUrl: product.imageUrl,
@@ -388,8 +395,8 @@ class _ProductCard extends ConsumerWidget {
               currentQty = val;
             },
           ),
-          rightButtonText: 'Add To Cart',
-          leftButtonText: 'Cancel',
+          rightButtonText: isVietnamese ? 'Thêm vào giỏ' : 'Add to Cart',
+          leftButtonText: context.loc.cancel,
           onTapLeftButton: (context) {
             context.pop();
           },

@@ -8,7 +8,9 @@ import 'package:go_router/go_router.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../core/locale/app_localizations.dart';
 import '../../../core/themes/app_sizes.dart';
+import '../../providers/locale/locale_notifier.dart';
 import '../../providers/products/product_form_notifier.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_dialog.dart';
@@ -59,6 +61,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
   }
 
   void onTapImage() async {
+    final isVietnamese = ref.read(localeNotifierProvider).languageCode == 'vi';
     final pickedFile = await ImagePicker().pickImage(
       source: ImageSource.gallery,
       imageQuality: 50,
@@ -70,8 +73,8 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
       sourcePath: pickedFile.path,
       aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
       uiSettings: [
-        AndroidUiSettings(toolbarTitle: 'Crop Photo'),
-        IOSUiSettings(title: 'Crop Photo'),
+        AndroidUiSettings(toolbarTitle: isVietnamese ? 'Cắt ảnh' : 'Crop Photo'),
+        IOSUiSettings(title: isVietnamese ? 'Cắt ảnh' : 'Crop Photo'),
       ],
     );
 
@@ -82,6 +85,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
   }
 
   void createProduct() async {
+    final isVietnamese = ref.read(localeNotifierProvider).languageCode == 'vi';
     var res = await AppDialog.showProgress(() {
       return ref.read(productFormNotifierProvider.notifier).createProduct();
     });
@@ -89,13 +93,14 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
     if (res.isSuccess) {
       if (!mounted) return;
       context.go('/products');
-      AppSnackBar.show('Product created');
+      AppSnackBar.show(isVietnamese ? 'Đã tạo sản phẩm thành công' : 'Product created');
     } else {
       AppDialog.showError(error: res.error?.toString());
     }
   }
 
   void updatedProduct() async {
+    final isVietnamese = ref.read(localeNotifierProvider).languageCode == 'vi';
     var res = await AppDialog.showProgress(() {
       return ref.read(productFormNotifierProvider.notifier).updatedProduct(widget.id!);
     });
@@ -103,13 +108,14 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
     if (res.isSuccess) {
       if (!mounted) return;
       context.pop();
-      AppSnackBar.show('Product updated');
+      AppSnackBar.show(isVietnamese ? 'Đã cập nhật sản phẩm thành công' : 'Product updated');
     } else {
       AppDialog.showError(error: res.error?.toString());
     }
   }
 
   void deleteProduct() async {
+    final isVietnamese = ref.read(localeNotifierProvider).languageCode == 'vi';
     var res = await AppDialog.showProgress(() {
       return ref.read(productFormNotifierProvider.notifier).deleteProduct(widget.id!);
     });
@@ -117,7 +123,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
     if (res.isSuccess) {
       if (!mounted) return;
       context.go('/products');
-      AppSnackBar.show('Product deleted');
+      AppSnackBar.show(isVietnamese ? 'Đã xóa sản phẩm thành công' : 'Product deleted');
     } else {
       AppDialog.showError(error: res.error?.toString());
     }
@@ -131,7 +137,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.id == null ? 'Create Product' : 'Edit Product'),
+        title: Text(widget.id == null ? context.loc.createProduct : context.loc.editProduct),
         titleSpacing: 0,
       ),
       body: !isLoaded
@@ -183,12 +189,13 @@ class _ImageSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final imageFile = ref.watch(productFormNotifierProvider.select((p) => p.imageFile));
     final imageUrl = ref.watch(productFormNotifierProvider.select((p) => p.imageUrl));
+    final isVietnamese = ref.watch(localeNotifierProvider).languageCode == 'vi';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Product Image',
+          isVietnamese ? 'Ảnh sản phẩm' : 'Product Image',
           style: Theme.of(context).textTheme.labelLarge?.copyWith(
             fontWeight: FontWeight.bold,
           ),
@@ -234,7 +241,7 @@ class _ImageSection extends ConsumerWidget {
   }
 }
 
-class _NameField extends StatelessWidget {
+class _NameField extends ConsumerWidget {
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
 
@@ -244,20 +251,21 @@ class _NameField extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isVietnamese = ref.watch(localeNotifierProvider).languageCode == 'vi';
     return Padding(
       padding: const EdgeInsets.only(top: AppSizes.padding),
       child: AppTextField(
         controller: controller,
-        labelText: 'Name',
-        hintText: 'Product name...',
+        labelText: context.loc.productName,
+        hintText: isVietnamese ? 'Nhập tên sản phẩm...' : 'Product name...',
         onChanged: onChanged,
       ),
     );
   }
 }
 
-class _PriceField extends StatelessWidget {
+class _PriceField extends ConsumerWidget {
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
 
@@ -267,13 +275,14 @@ class _PriceField extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isVietnamese = ref.watch(localeNotifierProvider).languageCode == 'vi';
     return Padding(
       padding: const EdgeInsets.only(top: AppSizes.padding),
       child: AppTextField(
         controller: controller,
-        labelText: 'Price',
-        hintText: 'Product price...',
+        labelText: context.loc.priceLabel,
+        hintText: isVietnamese ? 'Nhập giá bán...' : 'Product price...',
         type: AppTextFieldType.currency,
         onChanged: onChanged,
       ),
@@ -281,7 +290,7 @@ class _PriceField extends StatelessWidget {
   }
 }
 
-class _StockField extends StatelessWidget {
+class _StockField extends ConsumerWidget {
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
 
@@ -291,13 +300,14 @@ class _StockField extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isVietnamese = ref.watch(localeNotifierProvider).languageCode == 'vi';
     return Padding(
       padding: const EdgeInsets.only(top: AppSizes.padding),
       child: AppTextField(
         controller: controller,
-        labelText: 'Stock',
-        hintText: 'Product stock...',
+        labelText: context.loc.stockLabel,
+        hintText: isVietnamese ? 'Nhập số lượng tồn kho...' : 'Product stock...',
         keyboardType: TextInputType.number,
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
         onChanged: onChanged,
@@ -306,7 +316,7 @@ class _StockField extends StatelessWidget {
   }
 }
 
-class _DescriptionField extends StatelessWidget {
+class _DescriptionField extends ConsumerWidget {
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
 
@@ -316,13 +326,14 @@ class _DescriptionField extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isVietnamese = ref.watch(localeNotifierProvider).languageCode == 'vi';
     return Padding(
       padding: const EdgeInsets.only(top: AppSizes.padding),
       child: AppTextField(
         controller: controller,
-        labelText: 'Description',
-        hintText: 'Product description...',
+        labelText: context.loc.descriptionLabel,
+        hintText: isVietnamese ? 'Nhập mô tả sản phẩm...' : 'Product description...',
         maxLines: 4,
         onChanged: onChanged,
       ),
@@ -348,11 +359,14 @@ class _CreateOrUpdateButton extends ConsumerWidget {
         return (s.name?.isNotEmpty ?? false) && (s.price ?? 0) > 0 && (s.stock ?? 0) > 0;
       }),
     );
+    final isVietnamese = ref.watch(localeNotifierProvider).languageCode == 'vi';
 
     return Padding(
       padding: const EdgeInsets.only(top: AppSizes.padding * 1.5),
       child: AppButton(
-        text: id == null ? 'Add Product' : 'Update Product',
+        text: id == null 
+            ? context.loc.createProduct 
+            : (isVietnamese ? 'Cập nhật sản phẩm' : 'Update Product'),
         enabled: isFormValid,
         onTap: () {
           if (id != null) {
@@ -366,7 +380,7 @@ class _CreateOrUpdateButton extends ConsumerWidget {
   }
 }
 
-class _DeleteButton extends StatelessWidget {
+class _DeleteButton extends ConsumerWidget {
   final int? id;
   final VoidCallback onDeleteProduct;
 
@@ -376,7 +390,7 @@ class _DeleteButton extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     if (id == null) return const SizedBox(height: AppSizes.padding * 2);
 
     return Padding(
@@ -385,15 +399,15 @@ class _DeleteButton extends StatelessWidget {
         bottom: AppSizes.padding * 2,
       ),
       child: AppButton(
-        text: 'Delete',
+        text: context.loc.delete,
         textColor: Theme.of(context).colorScheme.error,
         buttonColor: Theme.of(context).colorScheme.surfaceContainerLowest,
         onTap: () {
           AppDialog.show(
-            title: 'Confirm',
-            text: 'Are you sure want to delete this product?',
-            leftButtonText: 'Cancel',
-            rightButtonText: 'Delete',
+            title: context.loc.confirm,
+            text: context.loc.confirmDeleteProduct,
+            leftButtonText: context.loc.cancel,
+            rightButtonText: context.loc.delete,
             rightButtonColor: Theme.of(context).colorScheme.errorContainer,
             rightButtonTextColor: Theme.of(context).colorScheme.error,
             onTapRightButton: (context) async {

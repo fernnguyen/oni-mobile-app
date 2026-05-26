@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/locale/app_localizations.dart';
 import '../../../../core/themes/app_sizes.dart';
 import '../../../../core/utilities/currency_formatter.dart';
 import '../../../../core/utilities/date_time_formatter.dart';
@@ -64,7 +65,7 @@ class TransactionCard extends StatelessWidget {
                     ),
                     const SizedBox(height: AppSizes.padding / 2),
                     Text(
-                      "${transaction.totalOrderedProduct} Products",
+                      "${transaction.totalOrderedProduct} ${context.loc.itemsLabel}",
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.bodySmall,
                     ),

@@ -4,8 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/di/app_providers.dart';
+import '../../../core/locale/app_localizations.dart';
 import '../../../core/themes/app_sizes.dart';
 import '../../providers/auth/auth_notifier.dart';
+import '../../providers/locale/locale_notifier.dart';
 import '../../providers/main/main_notifier.dart';
 import '../../providers/theme/theme_notifier.dart';
 import '../../widgets/app_button.dart';
@@ -18,7 +20,7 @@ class AccountScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Account')),
+      appBar: AppBar(title: Text(context.loc.navAccount)),
       body: const SingleChildScrollView(
         padding: EdgeInsets.all(AppSizes.padding),
         child: Column(
@@ -26,6 +28,7 @@ class AccountScreen extends StatelessWidget {
             _UserInfo(),
             _ProfileButton(),
             _ThemeButton(),
+            _LanguageButton(),
             _PrinterSettingsButton(),
             _AboutButton(),
             _SignOutButton(),
@@ -94,7 +97,7 @@ class _ProfileButton extends StatelessWidget {
                 ),
                 const SizedBox(width: AppSizes.padding / 1.5),
                 Text(
-                  'Profile',
+                  context.loc.profile,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -136,7 +139,7 @@ class _ThemeButton extends StatelessWidget {
                 ),
                 const SizedBox(width: AppSizes.padding / 1.5),
                 Text(
-                  'Theme',
+                  context.loc.theme,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -151,12 +154,114 @@ class _ThemeButton extends StatelessWidget {
         ),
         onTap: () {
           AppDialog.show(
-            title: 'Theme',
-            leftButtonText: 'Close',
+            title: context.loc.theme,
+            leftButtonText: context.loc.close,
             child: const _ThemeDialogBody(),
           );
         },
       ),
+    );
+  }
+}
+
+class _LanguageButton extends ConsumerWidget {
+  const _LanguageButton();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final locale = ref.watch(localeNotifierProvider);
+    final isVietnamese = locale.languageCode == 'vi';
+
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSizes.padding),
+      child: AppButton(
+        buttonColor: Theme.of(context).colorScheme.surface,
+        borderColor: Theme.of(context).colorScheme.surfaceContainer,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                const Icon(
+                  Icons.language_rounded,
+                  size: 18,
+                ),
+                const SizedBox(width: AppSizes.padding / 1.5),
+                Text(
+                  context.loc.languageLabel,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                Text(
+                  isVietnamese ? 'Tiếng Việt' : 'English',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                const Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 18,
+                ),
+              ],
+            ),
+          ],
+        ),
+        onTap: () {
+          AppDialog.show(
+            title: context.loc.selectLanguage,
+            leftButtonText: context.loc.close,
+            child: const _LanguageDialogBody(),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _LanguageDialogBody extends ConsumerWidget {
+  const _LanguageDialogBody();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currentLocale = ref.watch(localeNotifierProvider);
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ListTile(
+          title: const Text(
+            'Tiếng Việt',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          trailing: currentLocale.languageCode == 'vi'
+              ? Icon(Icons.check_circle_rounded, color: Theme.of(context).colorScheme.primary)
+              : null,
+          onTap: () {
+            ref.read(localeNotifierProvider.notifier).changeLocale('vi');
+            Navigator.of(context).pop();
+          },
+        ),
+        const Divider(height: 1),
+        ListTile(
+          title: const Text(
+            'English',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          trailing: currentLocale.languageCode == 'en'
+              ? Icon(Icons.check_circle_rounded, color: Theme.of(context).colorScheme.primary)
+              : null,
+          onTap: () {
+            ref.read(localeNotifierProvider.notifier).changeLocale('en');
+            Navigator.of(context).pop();
+          },
+        ),
+      ],
     );
   }
 }
@@ -182,7 +287,7 @@ class _PrinterSettingsButton extends StatelessWidget {
                 ),
                 const SizedBox(width: AppSizes.padding / 1.5),
                 Text(
-                  'Printer Settings',
+                  context.loc.printerSettings,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -224,7 +329,7 @@ class _AboutButton extends StatelessWidget {
                 ),
                 const SizedBox(width: AppSizes.padding / 1.5),
                 Text(
-                  'About',
+                  context.loc.aboutLabel,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -262,7 +367,7 @@ class _ThemeDialogBody extends ConsumerWidget {
         ),
         const SizedBox(width: AppSizes.padding),
         Text(
-          'Dark Mode',
+          context.loc.darkMode,
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
             fontWeight: FontWeight.bold,
           ),
@@ -277,6 +382,7 @@ class _SignOutButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isVietnamese = ref.watch(localeNotifierProvider).languageCode == 'vi';
     return Padding(
       padding: const EdgeInsets.only(top: AppSizes.padding),
       child: AppButton(
@@ -293,7 +399,7 @@ class _SignOutButton extends ConsumerWidget {
                 ),
                 const SizedBox(width: AppSizes.padding / 1.5),
                 Text(
-                  'Sign Out',
+                  context.loc.signOut,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -308,10 +414,10 @@ class _SignOutButton extends ConsumerWidget {
         ),
         onTap: () {
           AppDialog.show(
-            title: 'Confirm',
-            text: 'Are you sure want to sign out?',
-            leftButtonText: 'Cancel',
-            rightButtonText: 'Sign Out',
+            title: context.loc.confirm,
+            text: context.loc.confirmSignOut,
+            leftButtonText: context.loc.cancel,
+            rightButtonText: context.loc.signOut,
             onTapRightButton: (context) async {
               context.pop();
 
@@ -321,7 +427,9 @@ class _SignOutButton extends ConsumerWidget {
 
               if (isSyncronizing) {
                 AppSnackBar.showError(
-                  'Cannot sign out while synchronizing data is in progress. Please wait a moment.',
+                  isVietnamese
+                      ? 'Không thể đăng xuất khi đang đồng bộ dữ liệu. Vui lòng chờ trong giây lát.'
+                      : 'Cannot sign out while synchronizing data is in progress. Please wait a moment.',
                 );
                 return;
               }
@@ -350,6 +458,7 @@ class _DeleteAccountButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final isVietnamese = ref.watch(localeNotifierProvider).languageCode == 'vi';
     return Padding(
       padding: const EdgeInsets.only(top: AppSizes.padding),
       child: AppButton(
@@ -367,7 +476,7 @@ class _DeleteAccountButton extends ConsumerWidget {
                 ),
                 const SizedBox(width: AppSizes.padding / 1.5),
                 Text(
-                  'Delete Account',
+                  context.loc.deleteAccount,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: theme.colorScheme.error,
@@ -384,11 +493,10 @@ class _DeleteAccountButton extends ConsumerWidget {
         ),
         onTap: () {
           AppDialog.show(
-            title: 'Delete Account',
-            text:
-                'Are you sure you want to permanently delete your account? This action cannot be undone and all your local and remote POS data will be deleted.',
-            leftButtonText: 'Cancel',
-            rightButtonText: 'Delete',
+            title: context.loc.confirmDeleteAccount,
+            text: context.loc.confirmDeleteAccountWarn,
+            leftButtonText: context.loc.cancel,
+            rightButtonText: context.loc.delete,
             onTapRightButton: (context) async {
               context.pop();
 
@@ -398,7 +506,9 @@ class _DeleteAccountButton extends ConsumerWidget {
 
               if (isSyncronizing) {
                 AppSnackBar.showError(
-                  'Cannot delete account while synchronization is in progress. Please wait.',
+                  isVietnamese
+                      ? 'Không thể xóa tài khoản khi đang đồng bộ dữ liệu. Vui lòng chờ.'
+                      : 'Cannot delete account while synchronization is in progress. Please wait.',
                 );
                 return;
               }
@@ -413,7 +523,9 @@ class _DeleteAccountButton extends ConsumerWidget {
               if (res.isSuccess) {
                 if (!context.mounted) return;
                 context.go('/sign-in');
-                AppSnackBar.show('Your account has been deleted.');
+                AppSnackBar.show(
+                  isVietnamese ? 'Tài khoản của bạn đã được xóa.' : 'Your account has been deleted.',
+                );
               } else {
                 AppSnackBar.showError(res.error.toString());
               }

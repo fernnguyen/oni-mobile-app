@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/locale/app_localizations.dart';
 import '../../../core/themes/app_sizes.dart';
 import '../../../core/utilities/currency_formatter.dart';
 import '../../../core/utilities/date_time_formatter.dart';
+import '../../providers/locale/locale_notifier.dart';
 import '../../providers/products/product_detail_notifier.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_empty_state.dart';
@@ -21,9 +23,11 @@ class ProductDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isVietnamese = ref.watch(localeNotifierProvider).languageCode == 'vi';
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Product Detail'),
+        title: Text(isVietnamese ? 'Chi tiết sản phẩm' : 'Product Detail'),
         titleSpacing: 0,
         actions: [_EditButton(id: id)],
       ),
@@ -39,7 +43,7 @@ class ProductDetailScreen extends ConsumerWidget {
           }
 
           if (snapshot.data == null) {
-            return const AppEmptyState(title: 'Not Found');
+            return AppEmptyState(title: isVietnamese ? 'Không tìm thấy' : 'Not Found');
           }
 
           final product = snapshot.data!;
@@ -98,7 +102,7 @@ class _EditButton extends StatelessWidget {
             ),
             const SizedBox(width: AppSizes.padding / 4),
             Text(
-              'Edit Product',
+              context.loc.editProduct,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
                 fontSize: 10,
                 fontWeight: FontWeight.bold,
@@ -146,7 +150,7 @@ class _ProductImage extends StatelessWidget {
   }
 }
 
-class _ProductName extends StatelessWidget {
+class _ProductName extends ConsumerWidget {
   final String? productName;
   final String? createdAt;
   final String? updatedAt;
@@ -158,26 +162,32 @@ class _ProductName extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isVietnamese = ref.watch(localeNotifierProvider).languageCode == 'vi';
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          productName ?? '(No name)',
+          productName ?? (isVietnamese ? '(Chưa có tên)' : '(No name)'),
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
             fontWeight: FontWeight.bold,
           ),
         ),
         const SizedBox(height: AppSizes.padding / 2),
         Text(
-          "Added at ${DateTimeFormatter.stripDateWithClock(createdAt ?? '')}",
+          isVietnamese
+              ? "Đã thêm lúc ${DateTimeFormatter.stripDateWithClock(createdAt ?? '')}"
+              : "Added at ${DateTimeFormatter.stripDateWithClock(createdAt ?? '')}",
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
             fontSize: 10,
             color: Theme.of(context).colorScheme.outline,
           ),
         ),
         Text(
-          "Last updated at ${DateTimeFormatter.stripDateWithClock(updatedAt ?? '')}",
+          isVietnamese
+              ? "Cập nhật lần cuối lúc ${DateTimeFormatter.stripDateWithClock(updatedAt ?? '')}"
+              : "Last updated at ${DateTimeFormatter.stripDateWithClock(updatedAt ?? '')}",
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
             fontSize: 10,
             color: Theme.of(context).colorScheme.outline,
@@ -201,7 +211,7 @@ class _ProductPrice extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Price",
+            context.loc.priceLabel,
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           Text(
@@ -229,7 +239,7 @@ class _ProductStock extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Stock",
+            context.loc.stockLabel,
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           Text(
@@ -244,20 +254,22 @@ class _ProductStock extends StatelessWidget {
   }
 }
 
-class _ProductSold extends StatelessWidget {
+class _ProductSold extends ConsumerWidget {
   final int? sold;
 
   const _ProductSold({required this.sold});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isVietnamese = ref.watch(localeNotifierProvider).languageCode == 'vi';
+
     return Padding(
       padding: const EdgeInsets.only(top: AppSizes.padding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Sold",
+            isVietnamese ? 'Đã bán' : 'Sold',
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           Text(
@@ -272,24 +284,26 @@ class _ProductSold extends StatelessWidget {
   }
 }
 
-class _ProductDescription extends StatelessWidget {
+class _ProductDescription extends ConsumerWidget {
   final String? description;
 
   const _ProductDescription({required this.description});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isVietnamese = ref.watch(localeNotifierProvider).languageCode == 'vi';
+
     return Padding(
       padding: const EdgeInsets.only(top: AppSizes.padding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Description",
+            context.loc.descriptionLabel,
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           Text(
-            description ?? '(No description)',
+            description ?? (isVietnamese ? '(Không có mô tả)' : '(No description)'),
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
               fontWeight: FontWeight.bold,
             ),
