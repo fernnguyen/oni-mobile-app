@@ -142,7 +142,7 @@ class TransactionModel {
       totalOrderedProduct: items.length,
       createdAt: json['created_at']?.toString(),
       updatedAt: json['updated_at']?.toString(),
-      orderNo: json['order_no']?.toString(),
+      orderNo: json['order_id']?.toString() ?? json['id']?.toString(),
       remoteId: rawId,
     );
   }

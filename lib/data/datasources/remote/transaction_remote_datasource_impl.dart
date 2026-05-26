@@ -46,7 +46,7 @@ class TransactionRemoteDatasourceImpl extends TransactionDatasource {
 
       if (createdId != null) {
         transaction.remoteId = createdId.toString();
-        transaction.orderNo = res.data?['order_no']?.toString() ?? 'ORD-$intId';
+        transaction.orderNo = res.data?['order_id']?.toString() ?? res.data?['id']?.toString() ?? 'ORD-$intId';
       }
 
       return Result.success(data: intId);
@@ -79,7 +79,7 @@ class TransactionRemoteDatasourceImpl extends TransactionDatasource {
           if (matchOrder != null) {
             remoteUuid = matchOrder['id']?.toString() ?? '';
             transaction.remoteId = remoteUuid;
-            transaction.orderNo = matchOrder['order_no']?.toString();
+            transaction.orderNo = matchOrder['order_id']?.toString() ?? matchOrder['id']?.toString();
           }
         }
       }

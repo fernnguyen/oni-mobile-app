@@ -123,8 +123,12 @@ class _TransactionDetail extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(AppSizes.padding),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(AppSizes.radius),
+        border: Border.all(
+          width: 0.5,
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -236,8 +240,12 @@ class _PaymentDetail extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(AppSizes.padding),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(AppSizes.radius),
+        border: Border.all(
+          width: 0.5,
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

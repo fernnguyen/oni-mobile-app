@@ -94,20 +94,28 @@ class TransactionLocalDatasourceImpl extends TransactionDatasource {
           conflictAlgorithm: ConflictAlgorithm.replace,
         );
 
+        // Delete existing ordered products for this transaction to allow clean sync/overwrite
+        await trx.delete(
+          DatabaseConfig.orderedProductTableName,
+          where: 'transactionId = ?',
+          whereArgs: [transaction.id],
+        );
+
         if (transaction.orderedProducts?.isNotEmpty ?? false) {
           // Use batch for better performance
           var batch = trx.batch();
 
           for (var orderedProduct in transaction.orderedProducts!) {
-            // Update ordered product - Added proper where clause
-            batch.update(
+            orderedProduct.transactionId = transaction.id;
+
+            // Insert ordered product
+            batch.insert(
               DatabaseConfig.orderedProductTableName,
               orderedProduct.toJson(),
-              where: 'id = ?',
-              whereArgs: [orderedProduct.id],
+              conflictAlgorithm: ConflictAlgorithm.replace,
             );
 
-            // Get product
+            // Get product to update stock
             var rawProduct = await trx.query(
               DatabaseConfig.productTableName,
               where: 'id = ?',

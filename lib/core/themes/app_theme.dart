@@ -35,13 +35,22 @@ class AppTheme {
     _primaryTextTheme = primaryTextTheme ?? _primaryTextTheme;
     _secondaryTextTheme = secondaryTextTheme ?? _secondaryTextTheme;
 
+    final baseScheme = ColorScheme.fromSeed(
+      seedColor: _primaryColor,
+      brightness: _brightness,
+      primary: _primaryColor,
+      secondary: _secondaryColor,
+      tertiary: _tertiaryColor,
+    );
+
     return _base(
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: _primaryColor,
-        brightness: _brightness,
-        primary: _primaryColor,
-        secondary: _secondaryColor,
-        tertiary: _tertiaryColor,
+      colorScheme: baseScheme.copyWith(
+        surface: Colors.white,
+        surfaceContainer: Colors.white,
+        surfaceContainerLowest: Colors.white,
+        surfaceContainerLow: const Color(0xFFF8FAFC),
+        surfaceContainerHigh: const Color(0xFFF1F5F9),
+        surfaceContainerHighest: const Color(0xFFE2E8F0),
       ),
       brightness: _brightness,
       primaryTextTheme: _primaryTextTheme,
