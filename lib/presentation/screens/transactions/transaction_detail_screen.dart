@@ -139,7 +139,7 @@ class _TransactionDetail extends ConsumerWidget {
                 ),
               ),
               Text(
-                '${transaction.id ?? '-'}',
+                transaction.orderNo ?? 'ORD-${transaction.id ?? '-'}',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),

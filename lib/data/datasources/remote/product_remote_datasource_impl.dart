@@ -49,8 +49,32 @@ class ProductRemoteDatasourceImpl extends ProductDatasource {
   @override
   Future<Result<void>> updateProduct(ProductModel product) async {
     try {
+      String remoteUuid = '';
+      final searchRes = await apiClient.get<Map<String, dynamic>>(
+        '/api/shops/$shopId/products?limit=2000',
+        fromJson: (json) => json as Map<String, dynamic>,
+      );
+      if (searchRes.isSuccess) {
+        final List<dynamic> list = searchRes.data?['data'] ?? [];
+        final matchProduct = list.firstWhere(
+          (p) {
+            final productIdStr = p['id']?.toString() ?? '';
+            final mappedId = int.tryParse(productIdStr) ?? getStableHashCode(productIdStr);
+            return mappedId == product.id;
+          },
+          orElse: () => null,
+        );
+        if (matchProduct != null) {
+          remoteUuid = matchProduct['id']?.toString() ?? '';
+        }
+      }
+
+      if (remoteUuid.isEmpty) {
+        return Result.failure(error: Exception('Không tìm thấy ID từ hệ thống ERP cho sản phẩm #${product.id}'));
+      }
+
       final res = await apiClient.put<void>(
-        '/api/shops/$shopId/products/${product.id}',
+        '/api/shops/$shopId/products/$remoteUuid',
         body: product.toBackendJson(),
       );
       if (res.isFailure) return Result.failure(error: res.error!);
@@ -63,8 +87,32 @@ class ProductRemoteDatasourceImpl extends ProductDatasource {
   @override
   Future<Result<void>> deleteProduct(int id) async {
     try {
+      String remoteUuid = '';
+      final searchRes = await apiClient.get<Map<String, dynamic>>(
+        '/api/shops/$shopId/products?limit=2000',
+        fromJson: (json) => json as Map<String, dynamic>,
+      );
+      if (searchRes.isSuccess) {
+        final List<dynamic> list = searchRes.data?['data'] ?? [];
+        final matchProduct = list.firstWhere(
+          (p) {
+            final productIdStr = p['id']?.toString() ?? '';
+            final mappedId = int.tryParse(productIdStr) ?? getStableHashCode(productIdStr);
+            return mappedId == id;
+          },
+          orElse: () => null,
+        );
+        if (matchProduct != null) {
+          remoteUuid = matchProduct['id']?.toString() ?? '';
+        }
+      }
+
+      if (remoteUuid.isEmpty) {
+        return Result.failure(error: Exception('Không tìm thấy ID từ hệ thống ERP cho sản phẩm #$id'));
+      }
+
       final res = await apiClient.delete<void>(
-        '/api/shops/$shopId/products/$id',
+        '/api/shops/$shopId/products/$remoteUuid',
       );
       if (res.isFailure) return Result.failure(error: res.error!);
       return Result.success(data: null);
@@ -76,8 +124,32 @@ class ProductRemoteDatasourceImpl extends ProductDatasource {
   @override
   Future<Result<ProductModel?>> getProduct(int id) async {
     try {
+      String remoteUuid = '';
+      final searchRes = await apiClient.get<Map<String, dynamic>>(
+        '/api/shops/$shopId/products?limit=2000',
+        fromJson: (json) => json as Map<String, dynamic>,
+      );
+      if (searchRes.isSuccess) {
+        final List<dynamic> list = searchRes.data?['data'] ?? [];
+        final matchProduct = list.firstWhere(
+          (p) {
+            final productIdStr = p['id']?.toString() ?? '';
+            final mappedId = int.tryParse(productIdStr) ?? getStableHashCode(productIdStr);
+            return mappedId == id;
+          },
+          orElse: () => null,
+        );
+        if (matchProduct != null) {
+          remoteUuid = matchProduct['id']?.toString() ?? '';
+        }
+      }
+
+      if (remoteUuid.isEmpty) {
+        return Result.success(data: null);
+      }
+
       final res = await apiClient.get<Map<String, dynamic>>(
-        '/api/shops/$shopId/products/$id',
+        '/api/shops/$shopId/products/$remoteUuid',
         fromJson: (json) => json as Map<String, dynamic>,
       );
 

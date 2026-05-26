@@ -40,7 +40,7 @@ class TransactionCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "#${transaction.id}",
+                        transaction.orderNo ?? "ORD-${transaction.id}",
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),

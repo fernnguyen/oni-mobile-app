@@ -49,6 +49,14 @@ class DatabaseService {
       database.execute(DatabaseConfig.createOrderedProductTable),
       database.execute(DatabaseConfig.createQueuedActionTable),
     ]);
+
+    // Apply any schema modifications (e.g. adding columns to existing tables)
+    try {
+      await database.execute("ALTER TABLE '${DatabaseConfig.transactionTableName}' ADD COLUMN 'orderNo' TEXT;");
+    } catch (_) {}
+    try {
+      await database.execute("ALTER TABLE '${DatabaseConfig.transactionTableName}' ADD COLUMN 'remoteId' TEXT;");
+    } catch (_) {}
   }
 
   @visibleForTesting
@@ -63,6 +71,14 @@ class DatabaseService {
       database.execute(DatabaseConfig.createOrderedProductTable),
       database.execute(DatabaseConfig.createQueuedActionTable),
     ]);
+
+    // Apply any schema modifications (e.g. adding columns to existing tables)
+    try {
+      await database.execute("ALTER TABLE '${DatabaseConfig.transactionTableName}' ADD COLUMN 'orderNo' TEXT;");
+    } catch (_) {}
+    try {
+      await database.execute("ALTER TABLE '${DatabaseConfig.transactionTableName}' ADD COLUMN 'remoteId' TEXT;");
+    } catch (_) {}
   }
 
   Future<void> dropDatabase(String path) async {

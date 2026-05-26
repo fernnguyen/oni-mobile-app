@@ -4,7 +4,7 @@ class DateTimeFormatter {
   DateTimeFormatter._();
 
   static String normal(String iso8601String) {
-    var parsedDate = DateTime.tryParse(iso8601String);
+    var parsedDate = DateTime.tryParse(iso8601String)?.toLocal();
 
     if (parsedDate == null) {
       return '(Invalid date format)';
@@ -14,7 +14,7 @@ class DateTimeFormatter {
   }
 
   static String normalWithClock(String iso8601String) {
-    var parsedDate = DateTime.tryParse(iso8601String);
+    var parsedDate = DateTime.tryParse(iso8601String)?.toLocal();
 
     if (parsedDate == null) {
       return '(Invalid date format)';
@@ -24,7 +24,7 @@ class DateTimeFormatter {
   }
 
   static String detailed(String iso8601String) {
-    var parsedDate = DateTime.tryParse(iso8601String);
+    var parsedDate = DateTime.tryParse(iso8601String)?.toLocal();
 
     if (parsedDate == null) {
       return '(Invalid date format)';
@@ -34,7 +34,7 @@ class DateTimeFormatter {
   }
 
   static String detailedWithClock(String iso8601String) {
-    var parsedDate = DateTime.tryParse(iso8601String);
+    var parsedDate = DateTime.tryParse(iso8601String)?.toLocal();
 
     if (parsedDate == null) {
       return '(Invalid date format)';
@@ -44,7 +44,7 @@ class DateTimeFormatter {
   }
 
   static String dayShorted(String iso8601String) {
-    var parsedDate = DateTime.tryParse(iso8601String);
+    var parsedDate = DateTime.tryParse(iso8601String)?.toLocal();
 
     if (parsedDate == null) {
       return '(Invalid date format)';
@@ -54,7 +54,7 @@ class DateTimeFormatter {
   }
 
   static String slashDate(String iso8601String) {
-    var parsedDate = DateTime.tryParse(iso8601String);
+    var parsedDate = DateTime.tryParse(iso8601String)?.toLocal();
 
     if (parsedDate == null) {
       return '(Invalid date format)';
@@ -64,7 +64,7 @@ class DateTimeFormatter {
   }
 
   static String slashDateWithClock(String iso8601String) {
-    var parsedDate = DateTime.tryParse(iso8601String);
+    var parsedDate = DateTime.tryParse(iso8601String)?.toLocal();
 
     if (parsedDate == null) {
       return '(Invalid date format)';
@@ -74,7 +74,7 @@ class DateTimeFormatter {
   }
 
   static String slashDateShortedYearWithClock(String iso8601String) {
-    var parsedDate = DateTime.tryParse(iso8601String);
+    var parsedDate = DateTime.tryParse(iso8601String)?.toLocal();
 
     if (parsedDate == null) {
       return '(Invalid date format)';
@@ -84,7 +84,7 @@ class DateTimeFormatter {
   }
 
   static String onlyDate(String iso8601String) {
-    var parsedDate = DateTime.tryParse(iso8601String);
+    var parsedDate = DateTime.tryParse(iso8601String)?.toLocal();
 
     if (parsedDate == null) {
       return '(Invalid date format)';
@@ -94,7 +94,7 @@ class DateTimeFormatter {
   }
 
   static String onlyDateAndMonth(String iso8601String) {
-    var parsedDate = DateTime.tryParse(iso8601String);
+    var parsedDate = DateTime.tryParse(iso8601String)?.toLocal();
 
     if (parsedDate == null) {
       return '(Invalid date format)';
@@ -104,7 +104,7 @@ class DateTimeFormatter {
   }
 
   static String onlyMonth(String iso8601String) {
-    var parsedDate = DateTime.tryParse(iso8601String);
+    var parsedDate = DateTime.tryParse(iso8601String)?.toLocal();
 
     if (parsedDate == null) {
       return '(Invalid date format)';
@@ -114,7 +114,7 @@ class DateTimeFormatter {
   }
 
   static String onlyMonthAndYear(String iso8601String) {
-    var parsedDate = DateTime.tryParse(iso8601String);
+    var parsedDate = DateTime.tryParse(iso8601String)?.toLocal();
 
     if (parsedDate == null) {
       return '(Invalid date format)';
@@ -124,7 +124,7 @@ class DateTimeFormatter {
   }
 
   static String onlyYear(String iso8601String) {
-    var parsedDate = DateTime.tryParse(iso8601String);
+    var parsedDate = DateTime.tryParse(iso8601String)?.toLocal();
 
     if (parsedDate == null) {
       return '(Invalid date format)';
@@ -134,7 +134,7 @@ class DateTimeFormatter {
   }
 
   static String onlyDayShorted(String iso8601String) {
-    var parsedDate = DateTime.tryParse(iso8601String);
+    var parsedDate = DateTime.tryParse(iso8601String)?.toLocal();
 
     if (parsedDate == null) {
       return '(Invalid date format)';
@@ -144,7 +144,7 @@ class DateTimeFormatter {
   }
 
   static String onlyClockWithDivider(String iso8601String) {
-    var parsedDate = DateTime.tryParse(iso8601String);
+    var parsedDate = DateTime.tryParse(iso8601String)?.toLocal();
 
     if (parsedDate == null) {
       return '(Invalid date format)';
@@ -154,7 +154,7 @@ class DateTimeFormatter {
   }
 
   static String onlyClockWithoutDivider(String iso8601String) {
-    var parsedDate = DateTime.tryParse(iso8601String);
+    var parsedDate = DateTime.tryParse(iso8601String)?.toLocal();
 
     if (parsedDate == null) {
       return '(Invalid date format)';
@@ -164,7 +164,7 @@ class DateTimeFormatter {
   }
 
   static String stripDateWithClock(String iso8601String) {
-    var parsedDate = DateTime.tryParse(iso8601String);
+    var parsedDate = DateTime.tryParse(iso8601String)?.toLocal();
 
     if (parsedDate == null) {
       return '(Invalid date format)';
@@ -174,7 +174,7 @@ class DateTimeFormatter {
   }
 
   static String stripDate(String iso8601String) {
-    var parsedDate = DateTime.tryParse(iso8601String);
+    var parsedDate = DateTime.tryParse(iso8601String)?.toLocal();
 
     if (parsedDate == null) {
       return '(Invalid date format)';
@@ -184,7 +184,7 @@ class DateTimeFormatter {
   }
 
   static String onlyHour(String iso8601String) {
-    var parsedDate = DateTime.tryParse(iso8601String);
+    var parsedDate = DateTime.tryParse(iso8601String)?.toLocal();
 
     if (parsedDate == null) {
       return '(Invalid date format)';
@@ -194,7 +194,7 @@ class DateTimeFormatter {
   }
 
   static String onlyMinute(String iso8601String) {
-    var parsedDate = DateTime.tryParse(iso8601String);
+    var parsedDate = DateTime.tryParse(iso8601String)?.toLocal();
 
     if (parsedDate == null) {
       return '(Invalid date format)';

@@ -60,6 +60,8 @@ CREATE TABLE IF NOT EXISTS '$transactionTableName' (
     'totalOrderedProduct' INTEGER,
     'createdAt' DATETIME DEFAULT CURRENT_TIMESTAMP,
     'updatedAt' DATETIME DEFAULT CURRENT_TIMESTAMP,
+    'orderNo' TEXT,
+    'remoteId' TEXT,
     PRIMARY KEY ('id'),
     FOREIGN KEY ('createdById') REFERENCES 'User' ('id')
 );

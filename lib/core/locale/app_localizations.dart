@@ -152,6 +152,8 @@ class AppLocalizations {
       'select_printer': 'Chọn máy in',
       'paper_size': 'Khổ giấy',
       'print_test': 'In thử',
+      'out_of_stock': 'Hết hàng',
+      'sold': 'Đã bán',
     },
     'en': {
       // General
@@ -293,6 +295,8 @@ class AppLocalizations {
       'select_printer': 'Select Printer',
       'paper_size': 'Paper Size',
       'print_test': 'Print Test',
+      'out_of_stock': 'Out of stock',
+      'sold': 'Sold',
     },
   };
 
@@ -431,6 +435,8 @@ class AppLocalizations {
   String get selectPrinter => translate('select_printer');
   String get paperSize => translate('paper_size');
   String get printTest => translate('print_test');
+  String get outOfStock => translate('out_of_stock');
+  String get soldLabel => translate('sold');
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

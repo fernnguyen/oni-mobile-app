@@ -44,6 +44,11 @@ class TransactionRemoteDatasourceImpl extends TransactionDatasource {
       final createdId = res.data?['id'] ?? res.data?['order_id'];
       final intId = int.tryParse(createdId?.toString() ?? '') ?? (createdId != null ? getStableHashCode(createdId.toString()) : transaction.id);
 
+      if (createdId != null) {
+        transaction.remoteId = createdId.toString();
+        transaction.orderNo = res.data?['order_no']?.toString() ?? 'ORD-$intId';
+      }
+
       return Result.success(data: intId);
     } catch (e) {
       return Result.failure(error: e);
@@ -55,8 +60,36 @@ class TransactionRemoteDatasourceImpl extends TransactionDatasource {
     try {
       final currentUserEmail = apiClient.supabaseClient.auth.currentUser?.email ?? 'Unknown';
 
+      String remoteUuid = transaction.remoteId ?? '';
+      if (remoteUuid.isEmpty) {
+        final searchRes = await apiClient.get<Map<String, dynamic>>(
+          '/api/shops/$shopId/orders?search=ORD-${transaction.id}',
+          fromJson: (json) => json as Map<String, dynamic>,
+        );
+        if (searchRes.isSuccess) {
+          final List<dynamic> ordersList = searchRes.data?['data'] ?? [];
+          final matchOrder = ordersList.firstWhere(
+            (order) {
+              final orderIdStr = order['id']?.toString() ?? '';
+              final mappedId = int.tryParse(orderIdStr) ?? getStableHashCode(orderIdStr);
+              return mappedId == transaction.id;
+            },
+            orElse: () => null,
+          );
+          if (matchOrder != null) {
+            remoteUuid = matchOrder['id']?.toString() ?? '';
+            transaction.remoteId = remoteUuid;
+            transaction.orderNo = matchOrder['order_no']?.toString();
+          }
+        }
+      }
+
+      if (remoteUuid.isEmpty) {
+        return Result.failure(error: Exception('Không tìm thấy ID từ hệ thống ERP cho đơn hàng #${transaction.id}'));
+      }
+
       final res = await apiClient.put<void>(
-        '/api/shops/$shopId/orders/${transaction.id}',
+        '/api/shops/$shopId/orders/$remoteUuid',
         body: transaction.toBackendJson(shopId, currentUserEmail),
       );
 
@@ -70,8 +103,32 @@ class TransactionRemoteDatasourceImpl extends TransactionDatasource {
   @override
   Future<Result<void>> deleteTransaction(int id) async {
     try {
+      String remoteUuid = '';
+      final searchRes = await apiClient.get<Map<String, dynamic>>(
+        '/api/shops/$shopId/orders?search=ORD-$id',
+        fromJson: (json) => json as Map<String, dynamic>,
+      );
+      if (searchRes.isSuccess) {
+        final List<dynamic> ordersList = searchRes.data?['data'] ?? [];
+        final matchOrder = ordersList.firstWhere(
+          (order) {
+            final orderIdStr = order['id']?.toString() ?? '';
+            final mappedId = int.tryParse(orderIdStr) ?? getStableHashCode(orderIdStr);
+            return mappedId == id;
+          },
+          orElse: () => null,
+        );
+        if (matchOrder != null) {
+          remoteUuid = matchOrder['id']?.toString() ?? '';
+        }
+      }
+
+      if (remoteUuid.isEmpty) {
+        return Result.failure(error: Exception('Không tìm thấy ID từ hệ thống ERP cho đơn hàng #$id'));
+      }
+
       final res = await apiClient.delete<void>(
-        '/api/shops/$shopId/orders/$id',
+        '/api/shops/$shopId/orders/$remoteUuid',
       );
       if (res.isFailure) return Result.failure(error: res.error!);
       return Result.success(data: null);
@@ -83,8 +140,34 @@ class TransactionRemoteDatasourceImpl extends TransactionDatasource {
   @override
   Future<Result<TransactionModel?>> getTransaction(int id) async {
     try {
+      // First, resolve the remote UUID string from search
+      String remoteUuid = '';
+      final searchRes = await apiClient.get<Map<String, dynamic>>(
+        '/api/shops/$shopId/orders?search=ORD-$id',
+        fromJson: (json) => json as Map<String, dynamic>,
+      );
+
+      if (searchRes.isSuccess) {
+        final List<dynamic> ordersList = searchRes.data?['data'] ?? [];
+        final matchOrder = ordersList.firstWhere(
+          (order) {
+            final orderIdStr = order['id']?.toString() ?? '';
+            final mappedId = int.tryParse(orderIdStr) ?? getStableHashCode(orderIdStr);
+            return mappedId == id;
+          },
+          orElse: () => null,
+        );
+        if (matchOrder != null) {
+          remoteUuid = matchOrder['id']?.toString() ?? '';
+        }
+      }
+
+      if (remoteUuid.isEmpty) {
+        return Result.success(data: null);
+      }
+
       final res = await apiClient.get<Map<String, dynamic>>(
-        '/api/shops/$shopId/orders/$id',
+        '/api/shops/$shopId/orders/$remoteUuid',
         fromJson: (json) => json as Map<String, dynamic>,
       );
 
@@ -100,9 +183,9 @@ class TransactionRemoteDatasourceImpl extends TransactionDatasource {
         name: currentUserEmail.split('@')[0],
       );
 
-      // Tải các order items liên quan của order này
+      // Tải các order items liên quan của order này sử dụng remoteUuid
       final itemsRes = await apiClient.get<Map<String, dynamic>>(
-        '/api/shops/$shopId/order-items?order_id=$id',
+        '/api/shops/$shopId/order-items?order_id=$remoteUuid',
         fromJson: (json) => json as Map<String, dynamic>,
       );
 

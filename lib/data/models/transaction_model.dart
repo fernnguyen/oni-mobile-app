@@ -18,6 +18,8 @@ class TransactionModel {
   int totalOrderedProduct;
   String? createdAt;
   String? updatedAt;
+  String? orderNo;
+  String? remoteId;
 
   TransactionModel({
     required this.id,
@@ -33,6 +35,8 @@ class TransactionModel {
     required this.totalOrderedProduct,
     this.createdAt,
     this.updatedAt,
+    this.orderNo,
+    this.remoteId,
   });
 
   factory TransactionModel.fromJson(Map<String, dynamic> json) {
@@ -52,6 +56,8 @@ class TransactionModel {
       totalOrderedProduct: json['totalOrderedProduct'],
       createdAt: json['createdAt'],
       updatedAt: json['updatedAt'],
+      orderNo: json['orderNo'],
+      remoteId: json['remoteId'],
     );
   }
 
@@ -70,6 +76,8 @@ class TransactionModel {
       'totalOrderedProduct': totalOrderedProduct,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
+      'orderNo': orderNo,
+      'remoteId': remoteId,
     };
   }
 
@@ -88,6 +96,8 @@ class TransactionModel {
       totalOrderedProduct: entity.totalOrderedProduct,
       createdAt: entity.createdAt ?? DateTime.now().toIso8601String(),
       updatedAt: entity.updatedAt ?? DateTime.now().toIso8601String(),
+      orderNo: entity.orderNo,
+      remoteId: entity.remoteId,
     );
   }
 
@@ -106,6 +116,8 @@ class TransactionModel {
       totalOrderedProduct: totalOrderedProduct,
       createdAt: createdAt,
       updatedAt: updatedAt,
+      orderNo: orderNo,
+      remoteId: remoteId,
     );
   }
 
@@ -130,6 +142,8 @@ class TransactionModel {
       totalOrderedProduct: items.length,
       createdAt: json['created_at']?.toString(),
       updatedAt: json['updated_at']?.toString(),
+      orderNo: json['order_no']?.toString(),
+      remoteId: rawId,
     );
   }
 
