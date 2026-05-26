@@ -51,6 +51,15 @@ class AppTheme {
         surfaceContainerLow: const Color(0xFFF8FAFC),
         surfaceContainerHigh: const Color(0xFFF1F5F9),
         surfaceContainerHighest: const Color(0xFFE2E8F0),
+        surfaceTint: Colors.transparent,
+        primaryContainer: const Color(0xFFF8FAFC),
+        onPrimaryContainer: _primaryColor,
+        secondaryContainer: const Color(0xFFF1F5F9),
+        onSecondaryContainer: const Color(0xFF1E293B),
+        tertiaryContainer: const Color(0xFFF8FAFC),
+        onTertiaryContainer: const Color(0xFF1E293B),
+        outline: const Color(0xFFCBD5E1),
+        outlineVariant: const Color(0xFFE2E8F0),
       ),
       brightness: _brightness,
       primaryTextTheme: _primaryTextTheme,
@@ -81,6 +90,38 @@ class AppTheme {
       scaffoldBackgroundColor: brightness == Brightness.light
           ? AppColors.backgroundLight
           : colorScheme.surfaceContainerLowest,
+      cardColor: Colors.white,
+      hoverColor: Colors.black.withValues(alpha: 0.04),
+      splashColor: Colors.black.withValues(alpha: 0.04),
+      highlightColor: Colors.black.withValues(alpha: 0.02),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: Colors.white,
+        isDense: true,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(6),
+          borderSide: BorderSide(color: colorScheme.outlineVariant, width: 0.5),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(6),
+          borderSide: BorderSide(color: colorScheme.outlineVariant, width: 0.5),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(6),
+          borderSide: BorderSide(color: colorScheme.primary, width: 1.0),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(6),
+          borderSide: BorderSide(color: colorScheme.surfaceContainerHigh, width: 0.5),
+        ),
+        labelStyle: textTheme.bodyMedium?.copyWith(
+          color: colorScheme.onSurfaceVariant,
+        ),
+        hintStyle: textTheme.bodyMedium?.copyWith(
+          color: colorScheme.outline,
+        ),
+      ),
       textTheme: textTheme.apply(
         bodyColor: colorScheme.onSurface,
         displayColor: colorScheme.onSurface,
@@ -101,8 +142,8 @@ class AppTheme {
         ),
       ),
       tabBarTheme: TabBarThemeData(
-        labelColor: colorScheme.onSurface,
-        unselectedLabelColor: colorScheme.onSurface,
+        labelColor: colorScheme.primary,
+        unselectedLabelColor: const Color(0xFF64748B),
         indicator: BoxDecoration(
           border: Border(
             bottom: BorderSide(color: colorScheme.primary, width: 2),
@@ -124,7 +165,7 @@ class AppTheme {
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: colorScheme.surfaceContainerLowest,
         selectedItemColor: colorScheme.primary,
-        unselectedItemColor: colorScheme.outline,
+        unselectedItemColor: const Color(0xFF64748B),
         showUnselectedLabels: true,
         type: BottomNavigationBarType.fixed,
         selectedLabelStyle: textTheme.labelSmall?.copyWith(fontWeight: FontWeight.bold, fontSize: 10),

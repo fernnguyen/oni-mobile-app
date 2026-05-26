@@ -62,6 +62,7 @@ CREATE TABLE IF NOT EXISTS '$transactionTableName' (
     'updatedAt' DATETIME DEFAULT CURRENT_TIMESTAMP,
     'orderNo' TEXT,
     'remoteId' TEXT,
+    'customerId' TEXT,
     PRIMARY KEY ('id'),
     FOREIGN KEY ('createdById') REFERENCES 'User' ('id')
 );

@@ -57,6 +57,9 @@ class DatabaseService {
     try {
       await database.execute("ALTER TABLE '${DatabaseConfig.transactionTableName}' ADD COLUMN 'remoteId' TEXT;");
     } catch (_) {}
+    try {
+      await database.execute("ALTER TABLE '${DatabaseConfig.transactionTableName}' ADD COLUMN 'customerId' TEXT;");
+    } catch (_) {}
   }
 
   @visibleForTesting
@@ -78,6 +81,9 @@ class DatabaseService {
     } catch (_) {}
     try {
       await database.execute("ALTER TABLE '${DatabaseConfig.transactionTableName}' ADD COLUMN 'remoteId' TEXT;");
+    } catch (_) {}
+    try {
+      await database.execute("ALTER TABLE '${DatabaseConfig.transactionTableName}' ADD COLUMN 'customerId' TEXT;");
     } catch (_) {}
   }
 

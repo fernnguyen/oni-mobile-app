@@ -2,6 +2,7 @@ import 'package:app_image/app_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/locale/app_localizations.dart';
 import '../../../../core/themes/app_sizes.dart';
 import '../../../../core/utilities/currency_formatter.dart';
 import '../../../widgets/app_button.dart';
@@ -89,14 +90,14 @@ class _OrderCardState extends State<OrderCard> {
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              '/pcs',
+                              '/${context.loc.pcsLabel}',
                               style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 10),
                             ),
                           ],
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Stock: ${widget.stock}',
+                          '${context.loc.stockLabel}: ${widget.stock}',
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 10),
                         ),
                         const SizedBox(height: 6),
@@ -193,7 +194,7 @@ class _OrderCardState extends State<OrderCard> {
                   const SizedBox(height: 12),
                   if (widget.onTapRemove != null)
                     AppButton(
-                      text: 'Remove',
+                      text: context.loc.remove,
                       width: 70,
                       fontSize: 10,
                       borderRadius: BorderRadius.circular(4),
@@ -202,10 +203,10 @@ class _OrderCardState extends State<OrderCard> {
                       textColor: Theme.of(context).colorScheme.error,
                       onTap: () {
                         AppDialog.show(
-                          title: 'Confirm',
-                          text: 'Are you sure want to remove this product?',
-                          rightButtonText: 'Remove',
-                          leftButtonText: 'Cancel',
+                          title: context.loc.confirm,
+                          text: context.loc.removeConfirm,
+                          rightButtonText: context.loc.remove,
+                          leftButtonText: context.loc.cancel,
                           onTapRightButton: (context) {
                             widget.onTapRemove!();
                             context.pop();

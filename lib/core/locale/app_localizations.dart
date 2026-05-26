@@ -154,6 +154,11 @@ class AppLocalizations {
       'print_test': 'In thử',
       'out_of_stock': 'Hết hàng',
       'sold': 'Đã bán',
+      'remove_all': 'Xóa toàn bộ',
+      'remove_all_confirm': 'Bạn có chắc chắn muốn xóa tất cả sản phẩm khỏi giỏ hàng?',
+      'remove_confirm': 'Bạn có chắc chắn muốn xóa sản phẩm này?',
+      'products_label': 'sản phẩm',
+      'pcs_label': 'món',
     },
     'en': {
       // General
@@ -297,6 +302,11 @@ class AppLocalizations {
       'print_test': 'Print Test',
       'out_of_stock': 'Out of stock',
       'sold': 'Sold',
+      'remove_all': 'Remove All',
+      'remove_all_confirm': 'Are you sure want to remove all products?',
+      'remove_confirm': 'Are you sure want to remove this product?',
+      'products_label': 'Products',
+      'pcs_label': 'pcs',
     },
   };
 
@@ -437,6 +447,11 @@ class AppLocalizations {
   String get printTest => translate('print_test');
   String get outOfStock => translate('out_of_stock');
   String get soldLabel => translate('sold');
+  String get removeAll => translate('remove_all');
+  String get removeAllConfirm => translate('remove_all_confirm');
+  String get removeConfirm => translate('remove_confirm');
+  String get productsLabel => translate('products_label');
+  String get pcsLabel => translate('pcs_label');
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

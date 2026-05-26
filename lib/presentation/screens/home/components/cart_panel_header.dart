@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
+import '../../../../core/locale/app_localizations.dart';
 import '../../../../core/themes/app_sizes.dart';
 import '../../../providers/home/home_notifier.dart';
 import '../../../widgets/app_button.dart';
@@ -56,7 +57,7 @@ class CartPanelHeader extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '${homeState.orderedProducts.length} Products',
+                '${homeState.orderedProducts.length} ${context.loc.productsLabel}',
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -69,10 +70,10 @@ class CartPanelHeader extends ConsumerWidget {
                 enabled: homeState.orderedProducts.isNotEmpty,
                 onTap: () {
                   AppDialog.show(
-                    title: 'Confirm',
-                    text: 'Are you sure want to remove all product?',
-                    rightButtonText: 'Remove',
-                    leftButtonText: 'Cancel',
+                    title: context.loc.confirm,
+                    text: context.loc.removeAllConfirm,
+                    rightButtonText: context.loc.remove,
+                    leftButtonText: context.loc.cancel,
                     onTapRightButton: (context) {
                       ref.read(homeNotifierProvider.notifier).onRemoveAllOrderedProduct();
                       panelController.close();
@@ -89,7 +90,7 @@ class CartPanelHeader extends ConsumerWidget {
                     ),
                     const SizedBox(width: AppSizes.padding / 4),
                     Text(
-                      'Remove All',
+                      context.loc.removeAll,
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
                         fontSize: 10,
                         fontWeight: FontWeight.bold,

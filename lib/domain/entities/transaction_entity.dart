@@ -19,6 +19,7 @@ class TransactionEntity extends Equatable {
   final String? updatedAt;
   final String? orderNo;
   final String? remoteId;
+  final String? customerId;
 
   const TransactionEntity({
     this.id,
@@ -36,6 +37,7 @@ class TransactionEntity extends Equatable {
     this.updatedAt,
     this.orderNo,
     this.remoteId,
+    this.customerId,
   });
 
   TransactionEntity copyWith({
@@ -54,6 +56,7 @@ class TransactionEntity extends Equatable {
     String? updatedAt,
     String? orderNo,
     String? remoteId,
+    String? customerId,
   }) {
     return TransactionEntity(
       id: id ?? this.id,
@@ -71,6 +74,7 @@ class TransactionEntity extends Equatable {
       updatedAt: updatedAt ?? this.updatedAt,
       orderNo: orderNo ?? this.orderNo,
       remoteId: remoteId ?? this.remoteId,
+      customerId: customerId ?? this.customerId,
     );
   }
 
@@ -91,5 +95,6 @@ class TransactionEntity extends Equatable {
     updatedAt,
     orderNo,
     remoteId,
+    customerId,
   ];
 }

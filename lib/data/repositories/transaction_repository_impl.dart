@@ -155,6 +155,9 @@ class TransactionRepositoryImpl extends TransactionRepository {
           // Cập nhật ID mới và lưu lại bản ghi đồng bộ chính xác
           data.id = remote.data!;
           await transactionLocalDatasource.createTransaction(data);
+        } else {
+          // If IDs match, we STILL must update local transaction to store remoteId, orderNo and customerId!
+          await transactionLocalDatasource.updateTransaction(data);
         }
         return Result.success(data: remote.data!);
       } else {
@@ -282,8 +285,23 @@ class TransactionRepositoryImpl extends TransactionRepository {
       } else {
         // No matching remote transaction, create it
         processedIds.add(localData.id);
+        final oldId = localData.id;
         final res = await transactionRemoteDatasource.createTransaction(localData);
-        if (res.isSuccess) syncedToRemoteCount += 1;
+        if (res.isSuccess) {
+          syncedToRemoteCount += 1;
+          
+          final newId = res.data!;
+          if (newId != oldId) {
+            // Delete old temporary local transaction
+            await transactionLocalDatasource.deleteTransaction(oldId);
+            // Update local ID to remote-derived ID and write back to SQLite local (with remoteId and orderNo)
+            localData.id = newId;
+            await transactionLocalDatasource.createTransaction(localData);
+          } else {
+            // If they are somehow the same, just update the fields locally
+            await transactionLocalDatasource.updateTransaction(localData);
+          }
+        }
       }
     }
 

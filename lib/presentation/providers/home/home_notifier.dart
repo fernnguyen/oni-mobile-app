@@ -30,6 +30,7 @@ class HomeNotifier extends AutoDisposeNotifier<HomeState> {
         id: DateTime.now().millisecondsSinceEpoch,
         paymentMethod: state.selectedPaymentMethod,
         customerName: state.customerName,
+        customerId: state.customerId,
         description: state.description,
         orderedProducts: state.orderedProducts,
         createdById: user.id,
@@ -44,8 +45,13 @@ class HomeNotifier extends AutoDisposeNotifier<HomeState> {
       var res = await CreateTransactionUsecase(transactionRepository).call(transaction);
 
       if (res.isSuccess) {
-        // Auto print receipt (fire-and-forget, ignore failure)
-        ref.read(printerServiceProvider).printTransaction(transaction);
+        // Fetch the synced/created transaction from local SQLite to print with correct orderNo & remote details!
+        final updatedTxRes = await GetTransactionUsecase(transactionRepository).call(res.data!);
+        if (updatedTxRes.isSuccess && updatedTxRes.data != null) {
+          ref.read(printerServiceProvider).printTransaction(updatedTxRes.data!);
+        } else {
+          ref.read(printerServiceProvider).printTransaction(transaction.copyWith(id: res.data));
+        }
       }
 
       // Refresh products
@@ -55,6 +61,10 @@ class HomeNotifier extends AutoDisposeNotifier<HomeState> {
     } catch (e) {
       return Result.failure(error: e);
     }
+  }
+
+  void onChangedCustomerDetails(String? id, String? name, String? phone) {
+    state = state.copyWith(customerId: id, customerName: name, customerPhone: phone);
   }
 
   void onChangedIsPanelExpanded(bool val) {

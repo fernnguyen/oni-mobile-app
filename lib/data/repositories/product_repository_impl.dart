@@ -278,10 +278,9 @@ class ProductRepositoryImpl extends ProductRepository {
         }
         // If not significant difference, do nothing (already in sync)
       } else {
-        // No matching remote product, create it
+        // ERP là nguồn dữ liệu chuẩn (Source of Truth) cho sản phẩm. POS Mobile chỉ đọc/đồng bộ
+        // và không tự động tải/tạo sản phẩm từ SQLite cục bộ lên máy chủ trong tiến trình đồng bộ nền.
         processedIds.add(localData.id);
-        final res = await productRemoteDatasource.createProduct(localData);
-        if (res.isSuccess) syncedToRemoteCount += 1;
       }
     }
 

@@ -36,8 +36,14 @@ class AppIconButton extends StatelessWidget {
           height: height,
           padding: padding,
           decoration: BoxDecoration(
-            color: enabled ? Theme.of(context).colorScheme.surfaceContainer : Theme.of(context).colorScheme.surfaceDim,
+            color: enabled
+                ? Theme.of(context).colorScheme.surfaceContainerHigh
+                : Theme.of(context).colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(borderRadius),
+            border: Border.all(
+              color: Theme.of(context).colorScheme.outlineVariant,
+              width: 0.5,
+            ),
           ),
           child: Icon(
             icon,

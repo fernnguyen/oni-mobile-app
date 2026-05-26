@@ -20,6 +20,7 @@ class TransactionModel {
   String? updatedAt;
   String? orderNo;
   String? remoteId;
+  String? customerId;
 
   TransactionModel({
     required this.id,
@@ -37,6 +38,7 @@ class TransactionModel {
     this.updatedAt,
     this.orderNo,
     this.remoteId,
+    this.customerId,
   });
 
   factory TransactionModel.fromJson(Map<String, dynamic> json) {
@@ -58,6 +60,7 @@ class TransactionModel {
       updatedAt: json['updatedAt'],
       orderNo: json['orderNo'],
       remoteId: json['remoteId'],
+      customerId: json['customerId'],
     );
   }
 
@@ -78,6 +81,7 @@ class TransactionModel {
       'updatedAt': updatedAt,
       'orderNo': orderNo,
       'remoteId': remoteId,
+      'customerId': customerId,
     };
   }
 
@@ -98,6 +102,7 @@ class TransactionModel {
       updatedAt: entity.updatedAt ?? DateTime.now().toIso8601String(),
       orderNo: entity.orderNo,
       remoteId: entity.remoteId,
+      customerId: entity.customerId,
     );
   }
 
@@ -118,6 +123,7 @@ class TransactionModel {
       updatedAt: updatedAt,
       orderNo: orderNo,
       remoteId: remoteId,
+      customerId: customerId,
     );
   }
 
@@ -144,6 +150,7 @@ class TransactionModel {
       updatedAt: json['updated_at']?.toString(),
       orderNo: json['order_id']?.toString() ?? json['id']?.toString(),
       remoteId: rawId,
+      customerId: json['customer_id']?.toString(),
     );
   }
 
@@ -154,7 +161,7 @@ class TransactionModel {
     return {
       'order_no': 'ORD-$id',
       'status': 'completed',
-      'customer_id': '', // let server auto-generate/resolve
+      'customer_id': customerId ?? '',
       'customer_name': customerName ?? 'Khách lẻ',
       'branch_id': branchId,
       'employee_id': employeeId,
